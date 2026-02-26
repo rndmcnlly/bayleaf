@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BayLeaf AI Playground</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1 { color: #1a1a1a; }
+        h2 { color: #2a5298; margin-top: 2rem; }
+        a { color: #2a5298; }
+        .tagline {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+        .services {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+        .service-link {
+            display: inline-block;
+            background: #2a5298;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .service-link:hover { background: #1e3a6e; }
+        .service-link.api { background: #2d8659; }
+        .service-link.api:hover { background: #1e5a3a; }
+        ul { padding-left: 1.5rem; }
+        li { margin-bottom: 0.5rem; }
+        .contact { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #eee; }
+        .screenshots { margin-top: 2rem; }
+        .screenshots img { max-width: 100%; border-radius: 8px; margin: 0.5rem 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <h1>BayLeaf AI Playground</h1>
+    <p class="tagline">An experimental Generative AI Playground for UC Santa Cruz</p>
+    
+    <div class="services">
+        <a href="https://bayleaf.chat/" class="service-link">BayLeaf Chat</a>
+        <a href="https://api.bayleaf.chat" class="service-link api">BayLeaf API</a>
+    </div>
+
+    <h2>About the AI Playground</h2>
+    <p>
+        BayLeaf Chat and BayLeaf API form an experimental Generative AI Playground designed to serve 
+        the entire UC Santa Cruz campus community (students, faculty, and staff). The system is operated 
+        by <a href="mailto:amsmith@ucsc.edu">Adam Smith</a> (faculty from the Department of Computational Media), 
+        as a living prototype of a possible future university-managed service.
+    </p>
+
+    <p>
+        LLM inference for the Playground is based on a portfolio of <strong>zero-data-retention</strong> 
+        providers accessed via <a href="https://openrouter.ai/">OpenRouter</a>.
+    </p>
+
+    <h2>Privacy</h2>
+    <ul>
+        <li>Your message contents are not logged or stored by any third-party providers</li>
+        <li>The chat interface maintains just one copy of your messages in an encrypted database 
+            that is only accessible by the system administrator</li>
+    </ul>
+
+    <h2>Chat Service</h2>
+    <p>
+        Our Chat service provides access, by default, to one model called <strong>"Basic"</strong> 
+        that is powered by a strong, <a href="https://artificialanalysis.ai/models/open-source">open-weight</a> 
+        LLM (which one varies from month to month). Basic uses a system prompt that customizes it 
+        for the campus community (e.g. some basic self-knowledge of BayLeaf and the Chat user interface).
+    </p>
+    <p>
+        The <strong>"Help"</strong> model also available in the chat interface can accept 
+        "invite-..." style invite codes, allowing users access to specialized groups that might, 
+        for example, offer course/department/role-specific models or toolkits.
+    </p>
+    <p>
+        The <strong>Web Search</strong> and <strong>Web Page Content</strong> toolkits are available 
+        to everyone and allow some level of autonomy in agentic research processes.
+    </p>
+    <p>
+        Most chat models are subject to a rate limit mechanism that ensures fair and cost-efficient 
+        access for all.
+    </p>
+    <p>
+        <em>Tip:</em> Chat message replies from models are limited in length based on the number of 
+        turns in the conversation so far. Users should prefer many short conversations on distinct 
+        topics rather than one long one that meanders through unrelated topics.
+    </p>
+
+    <h2>API Service</h2>
+    <p>
+        Our API service provides <strong>key-less access</strong> to users connecting from the campus 
+        network (e.g. 169.233.x.x), and it allows authenticated users to grant themselves an API key 
+        for off-campus access.
+    </p>
+    <p>
+        This API injects a short system prompt prefix to all proxied requests to lightly customize 
+        downstream agents for use with the Playground.
+    </p>
+    <p>
+        To allow for experimentation, API requests are not closely rate limited, but individual keys 
+        are subject to a reasonable total daily spending limit.
+    </p>
+    <p>
+        For a list of models and per-token prices, visit <a href="https://openrouter.ai/models">https://openrouter.ai/models</a> 
+        (note that only models available from ZDR providers can be accessed via BayLeaf API).
+    </p>
+
+    <div class="contact">
+        <strong>Contact:</strong> <a href="mailto:amsmith@ucsc.edu">Adam Smith</a> | 
+        <a href="https://campusdirectory.ucsc.edu/cd_detail?uid=amsmith">UCSC Directory</a>
+    </div>
+
+    <div class="screenshots">
+        <h2>Screenshots</h2>
+        <p><em>Screenshots to be added</em></p>
+    </div>
+</body>
+</html>
