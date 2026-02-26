@@ -44,7 +44,10 @@
         li { margin-bottom: 0.5rem; }
         .contact { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #eee; }
         .screenshots { margin-top: 2rem; }
-        .screenshots img { max-width: 100%; border-radius: 8px; margin: 0.5rem 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .screenshots .gallery { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .screenshots figure { margin: 0; flex: 1; min-width: 200px; }
+        .screenshots img { width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: block; }
+        .screenshots figcaption { font-size: 0.9rem; color: #666; margin-top: 0.4rem; font-style: italic; }
     </style>
 </head>
 <body>
@@ -128,7 +131,16 @@
 
     <div class="screenshots">
         <h2>Screenshots</h2>
-        <p><em>Screenshots to be added</em></p>
+        <div class="gallery">
+            <figure>
+                <a href="images/screenshot-welcome.jpg"><img src="images/screenshot-welcome.jpg" alt="BayLeaf welcome screen with suggested prompts"></a>
+                <figcaption>Welcome screen offering suggested prompts for use with the Basic model</figcaption>
+            </figure>
+            <figure>
+                <a href="images/screenshot-countdown.jpg"><img src="images/screenshot-countdown.jpg" alt="BayLeaf conversation generating a countdown timer"></a>
+                <figcaption>Conversation generating HTML/CSS/JS code for an interactive countdown timer</figcaption>
+            </figure>
+        </div>
     </div>
 </body>
 </html>
