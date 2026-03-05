@@ -56,11 +56,11 @@ export function dashboardPage(
       <h3>Quick Start</h3>
       <p><strong>Endpoint URL:</strong></p>
       <div class="copy-box" onclick="copyToClipboard(this)">
-        <code>https://api.bayleaf.chat/v1</code>
+        <code>https://api.bayleaf.dev/v1</code>
         <span class="copy-hint">Click to copy</span>
       </div>
       <p style="margin-top: 1rem;"><strong>Example request:</strong></p>
-      <pre><code>curl https://api.bayleaf.chat/v1/chat/completions \\
+      <pre><code>curl https://api.bayleaf.dev/v1/chat/completions \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{

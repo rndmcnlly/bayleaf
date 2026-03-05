@@ -5,7 +5,7 @@ operated by [Adam Smith](https://adamsmith.as) (Dept. of Computational Media).
 
 ## Services
 
-### BayLeaf Chat — [bayleaf.chat](https://bayleaf.chat)
+### BayLeaf Chat — [chat.bayleaf.dev](https://chat.bayleaf.dev)
 
 An [Open WebUI](https://openwebui.com/) deployment offering curated AI models to
 UCSC students, faculty, and staff. Features include:
@@ -17,7 +17,7 @@ UCSC students, faculty, and staff. Features include:
 - **Web Search** and **Web Page Content** tools available to all users
 - Per-turn rate limiting for fair, cost-efficient access
 
-### BayLeaf API — [api.bayleaf.chat](https://api.bayleaf.chat)
+### BayLeaf API — [api.bayleaf.dev](https://api.bayleaf.dev)
 
 An OpenRouter-proxying API that gives the campus community programmatic access to
 LLMs:
@@ -36,8 +36,8 @@ any third-party provider.
 
 ## This Repository
 
-- `api/` — BayLeaf API Cloudflare Worker ([api.bayleaf.chat](https://api.bayleaf.chat))
-- `docs/` — Static GitHub Pages site published at [about.bayleaf.chat](https://about.bayleaf.chat)
+- `api/` — BayLeaf API Cloudflare Worker ([api.bayleaf.dev](https://api.bayleaf.dev))
+- `docs/` — Static GitHub Pages site published at [bayleaf.dev](https://bayleaf.dev)
 - `chat/` — OWUI deployment backup: workspace models, custom tools, filters, and [design doc](chat/DESIGN.md)
 
 This repo is **publicly visible**. It never contains API keys, credentials, or

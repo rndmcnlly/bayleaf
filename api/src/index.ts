@@ -6,7 +6,7 @@
  * 2. OpenRouter API key provisioning for authenticated users
  * 3. LLM inference proxy with campus-specific system prompt injection
  * 
- * @see https://bayleaf.chat/about
+ * @see https://bayleaf.dev
  */
 
 import { Hono } from 'hono';

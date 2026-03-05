@@ -1,6 +1,6 @@
 # BayLeaf API
 
-API key provisioning and LLM inference proxy for UC Santa Cruz, part of the [BayLeaf Chat](https://bayleaf.chat/about) platform.
+API key provisioning and LLM inference proxy for UC Santa Cruz, part of the [BayLeaf Chat](https://bayleaf.dev) platform.
 
 ## Features
 
@@ -62,7 +62,7 @@ No database required - all state is managed via OpenRouter's API (keys are ident
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create OAuth 2.0 credentials (Web application)
-3. Add authorized redirect URI: `https://api.bayleaf.chat/callback`
+3. Add authorized redirect URI: `https://api.bayleaf.dev/callback`
 4. Set the OIDC client ID and secret as Cloudflare secrets
 
 ### Environment Variables
@@ -120,23 +120,23 @@ On-campus users can access the API without any authentication:
 
 ```bash
 # Chat Completions — no Authorization header needed on campus
-curl https://api.bayleaf.chat/v1/chat/completions \
+curl https://api.bayleaf.dev/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model": "deepseek/deepseek-v3.2", "messages": [{"role": "user", "content": "Hello!"}]}'
 
 # Responses API
-curl https://api.bayleaf.chat/v1/responses \
+curl https://api.bayleaf.dev/v1/responses \
   -H "Content-Type: application/json" \
   -d '{"model": "deepseek/deepseek-v3.2", "input": "Hello!"}'
 
 # Or explicitly use "campus" as the key
-curl https://api.bayleaf.chat/v1/chat/completions \
+curl https://api.bayleaf.dev/v1/chat/completions \
   -H "Authorization: Bearer campus" \
   -H "Content-Type: application/json" \
   -d '{"model": "deepseek/deepseek-v3.2", "messages": [{"role": "user", "content": "Hello!"}]}'
 ```
 
-Off-campus users will receive a 401 error directing them to get a personal key at https://api.bayleaf.chat/
+Off-campus users will receive a 401 error directing them to get a personal key at https://api.bayleaf.dev/
 
 ## API Endpoints
 
@@ -169,6 +169,6 @@ MIT License - see [LICENSE](LICENSE)
 
 ## Links
 
-- [BayLeaf Chat](https://bayleaf.chat/about)
+- [BayLeaf Chat](https://bayleaf.dev)
 - [OpenRouter](https://openrouter.ai/)
 - [Cloudflare Workers](https://developers.cloudflare.com/workers/)

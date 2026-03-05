@@ -124,7 +124,7 @@ export function baseLayout(title: string, content: string): string {
     ${content}
   </main>
   <footer>
-    <p>A service of <a href="https://bayleaf.chat/about">BayLeaf Chat</a> for UC Santa Cruz. <a href="https://github.com/rndmcnlly/bayleaf/tree/main/api">Source on GitHub</a>.</p>
+    <p>A service of <a href="https://bayleaf.dev">BayLeaf Chat</a> for UC Santa Cruz. <a href="https://github.com/rndmcnlly/bayleaf/tree/main/api">Source on GitHub</a>.</p>
   </footer>
 </body>
 </html>`;
@@ -143,7 +143,7 @@ export function opencodeOnboardingSection(recommendedModel: string): string {
       <ol>
         <li><a href="https://opencode.ai/docs" target="_blank">Install OpenCode</a></li>
         <li>Launch <code>opencode</code> and ask it:<br>
-          <em>Help me set up BayLeaf as a provider. Load the skill from <a href="SKILL.md" target="_blank">https://api.bayleaf.chat/SKILL.md</a></em>
+          <em>Help me set up BayLeaf as a provider. Load the skill from <a href="SKILL.md" target="_blank">https://api.bayleaf.dev/SKILL.md</a></em>
         </li>
       </ol>
     </div>

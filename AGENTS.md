@@ -10,9 +10,9 @@ Public repo for the **BayLeaf AI Playground** — an experimental Generative AI 
 for the UC Santa Cruz campus community, operated by Adam Smith (Dept. of Computational
 Media). **Publicly visible; never commit secrets, API keys, or credentials.**
 
-- **BayLeaf Chat** — `https://bayleaf.chat` — Open WebUI with curated models,
+- **BayLeaf Chat** — `https://chat.bayleaf.dev` — Open WebUI with curated models,
   invite-code-gated groups, web search/browsing tools, and rate limiting.
-- **BayLeaf API** — `https://api.bayleaf.chat` — OpenRouter-proxying API with keyless
+- **BayLeaf API** — `https://api.bayleaf.dev` — OpenRouter-proxying API with keyless
   on-campus access and key-based off-campus access. Source: `api/` in this repo.
 
 All LLM inference uses **zero-data-retention (ZDR)** providers via OpenRouter.
@@ -28,7 +28,7 @@ bayleaf/
 │   ├── migrations/
 │   ├── wrangler.jsonc
 │   └── package.json
-├── docs/               # GitHub Pages site → https://about.bayleaf.chat
+├── docs/               # GitHub Pages site → https://bayleaf.dev
 │   ├── CNAME
 │   ├── index.html      # Single-file about/landing page
 │   └── images/
@@ -36,10 +36,9 @@ bayleaf/
 └── AGENTS.md           # This file
 ```
 
-`docs/` is published via GitHub Pages at `https://about.bayleaf.chat`. The apex
-domain `https://bayleaf.chat` runs Open WebUI and is **not** managed here.
+`docs/` is published via GitHub Pages at `https://bayleaf.dev`.
 
-`api/` is a Cloudflare Worker deployed at `https://api.bayleaf.chat`. See
+`api/` is a Cloudflare Worker deployed at `https://api.bayleaf.dev`. See
 `api/AGENTS.md` for API-specific guidelines, code style, and commands.
 
 ---

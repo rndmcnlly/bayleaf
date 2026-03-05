@@ -37,7 +37,7 @@ export async function resolveAuth(
     }
     return c.json({
       error: {
-        message: 'API key required. On-campus users can omit the key or use "campus". Visit https://api.bayleaf.chat/ for a free personal key.',
+        message: 'API key required. On-campus users can omit the key or use "campus". Visit https://api.bayleaf.dev/ for a free personal key.',
         code: 401,
       },
     }, 401);

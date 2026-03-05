@@ -10,7 +10,7 @@ export function landingPage(showCampusPass: boolean, recommendedModel: string): 
       <h3>Campus Pass Available</h3>
       <p>You're on the UCSC network! You can use the API right now without signing in.</p>
       <p>Just point any OpenAI-compatible client at:</p>
-      <pre><code>https://api.bayleaf.chat/v1</code></pre>
+      <pre><code>https://api.bayleaf.dev/v1</code></pre>
       <p>No API key needed, or use <code>campus</code> as your key.</p>
       ${recommendedModelHint(recommendedModel)}
     </div>
