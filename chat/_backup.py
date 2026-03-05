@@ -15,9 +15,8 @@ import sys
 import json
 import base64
 import urllib.request
-import urllib.error
 
-BASE_URL = "https://bayleaf.chat"
+BASE_URL = "https://chat.bayleaf.dev"
 TOKEN = os.environ.get("OWUI_TOKEN", "")
 CHAT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -33,13 +32,8 @@ def api_get(path):
         "Authorization": f"Bearer {TOKEN}",
         "Accept": "application/json",
     })
-    try:
-        with urllib.request.urlopen(req) as resp:
-            data = resp.read()
-            return json.loads(data)
-    except urllib.error.HTTPError as e:
-        print(f"  ERROR {e.code} fetching {path}: {e.read().decode()[:200]}")
-        return None
+    with urllib.request.urlopen(req) as resp:
+        return json.loads(resp.read())
 
 
 def write_json(path, obj):
@@ -85,10 +79,6 @@ def backup_models():
     for model_id in MODEL_IDS:
         print(f"\n--- {model_id} ---")
         data = api_get(f"/api/v1/models/model?id={model_id}")
-        if not data:
-            print(f"  SKIP: could not fetch {model_id}")
-            continue
-
         model_dir = os.path.join(CHAT_DIR, "models", model_id)
         os.makedirs(model_dir, exist_ok=True)
 
@@ -111,12 +101,7 @@ def backup_models():
 
 def backup_tools():
     print("\n=== Tools ===")
-    tools = api_get("/api/v1/tools/")
-    if not tools:
-        print("  SKIP: could not fetch tools")
-        return
-
-    for tool in tools:
+    for tool in api_get("/api/v1/tools/"):
         tool_id = tool["id"]
         print(f"\n--- {tool_id} ---")
         tool_dir = os.path.join(CHAT_DIR, "tools", tool_id)
@@ -132,20 +117,13 @@ def backup_tools():
 
 def backup_functions():
     print("\n=== Functions ===")
-    # Functions list endpoint
-    fn_list = api_get("/api/v1/functions/")
-    if not fn_list:
-        # Try fetching individually
-        fn_ids = ["rate_limit_filter", "depth_limit_filter", "brace_submit_action", "brace_filter"]
-        fn_list = []
-        for fn_id in fn_ids:
-            fn = api_get(f"/api/v1/functions/id/{fn_id}")
-            if fn:
-                fn_list.append(fn)
+    # The list endpoint omits source code ("content"), so we discover IDs
+    # from the list and then fetch each one individually for full data.
+    fn_ids = [fn["id"] for fn in api_get("/api/v1/functions/")]
 
-    for fn in fn_list:
-        fn_id = fn["id"]
+    for fn_id in fn_ids:
         print(f"\n--- {fn_id} ---")
+        fn = api_get(f"/api/v1/functions/id/{fn_id}")
         fn_dir = os.path.join(CHAT_DIR, "functions", fn_id)
         os.makedirs(fn_dir, exist_ok=True)
 

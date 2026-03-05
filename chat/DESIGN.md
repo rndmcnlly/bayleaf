@@ -1,6 +1,6 @@
 # BayLeaf Chat — Deployment & Configuration
 
-*Backup and design reference for the Open WebUI deployment at `bayleaf.chat`.*
+*Backup and design reference for the Open WebUI deployment at `chat.bayleaf.dev`.*
 
 This directory is a recovery-oriented backup of the BayLeaf Chat service. It
 captures the Digital Ocean App Platform deployment configuration, the OWUI
@@ -31,8 +31,8 @@ sufficient to reconstruct the service from scratch.
 
 | Rule | Target |
 |------|--------|
-| `bayleaf.chat` / | `open-webui` service |
-| `bayleaf.chat` /about | 302 redirect → `about.bayleaf.chat` |
+| `chat.bayleaf.dev` / | `open-webui` service |
+| `bayleaf.dev` | About/landing page (GitHub Pages) |
 
 ### Database
 
@@ -239,7 +239,64 @@ To reconstruct BayLeaf Chat from this backup:
 
 ---
 
-## 6. Directory Structure
+## 6. Synchronization Workflow
+
+This directory is the source of truth for model system prompts, tool source
+code, and function source code. Changes flow in two directions:
+
+### Pull (backup from live instance)
+
+```bash
+OWUI_TOKEN=<bearer-token> python3 chat/_backup.py
+```
+
+Exports models, tools, and functions from the live OWUI instance into this
+directory. Then `git diff chat/` to review changes.
+
+### Push (apply repo changes to live instance)
+
+There is no automated push script. Use the OWUI admin API directly:
+
+| Resource | Endpoint | Method |
+|----------|----------|--------|
+| Model | `/api/v1/models/model/update` | `POST` (body: full model JSON with `id`, `name`, `meta`, `params`, `base_model_id`) |
+| Tool | `/api/v1/tools/id/{id}/update` | `POST` (body: full tool JSON with `id`, `name`, `meta`, `content`) |
+| Function | `/api/v1/functions/id/{id}/update` | `POST` (body: full function JSON with `id`, `name`, `meta`, `content`) |
+
+All endpoints require `Authorization: Bearer <token>` and admin role.
+
+Alternatively, edit each item manually in the OWUI admin UI (Admin Panel ->
+Workspace -> Models / Tools / Functions).
+
+### Bearer token
+
+Get a token from the OWUI web UI: open browser dev tools, find any API
+request, and copy the `Authorization: Bearer ...` header value. Tokens are
+session-scoped and expire.
+
+### API quirks
+
+- **Tools list** (`GET /api/v1/tools/`) uses `defer_content=True` internally,
+  so responses omit the `content` (source code) field. Fetch individual tools
+  via `GET /api/v1/tools/id/{id}` to get full data.
+- **Functions list** (`GET /api/v1/functions/`) returns `FunctionResponse`
+  which also omits `content`. Use `GET /api/v1/functions/id/{id}` for full
+  data including source. The backup script handles this by discovering IDs
+  from the list and then fetching each function individually.
+
+### Upstream API source (for future reference)
+
+The authoritative route definitions live in the Open WebUI repo at:
+
+- [`backend/open_webui/routers/models.py`](https://github.com/open-webui/open-webui/blob/main/backend/open_webui/routers/models.py)
+- [`backend/open_webui/routers/tools.py`](https://github.com/open-webui/open-webui/blob/main/backend/open_webui/routers/tools.py)
+- [`backend/open_webui/routers/functions.py`](https://github.com/open-webui/open-webui/blob/main/backend/open_webui/routers/functions.py)
+
+These are on the `main` branch and may change between OWUI releases.
+
+---
+
+## 7. Directory Structure
 
 ```
 chat/

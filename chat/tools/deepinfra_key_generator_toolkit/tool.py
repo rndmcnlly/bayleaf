@@ -28,7 +28,7 @@ class Tools:
         """
         Generates an API key for DeepInfra specific to this user, relevant for making LLM-powered demos inside of the chat UI.
         Do not call this tool unless the user is specifically requesting an API key for accessing LLM services outside of the BayLeaf platform.
-        Users can also visit https://api.bayleaf.chat personal API key for use in external tools like coding agents.
+        Users can also visit https://api.bayleaf.dev personal API key for use in external tools like coding agents.
         """
         user_id = __user__["id"]
         if user_id not in cache:
