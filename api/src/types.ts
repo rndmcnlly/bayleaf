@@ -19,11 +19,17 @@ export interface Bindings {
   CAMPUS_IP_RANGES: string;        // Comma-separated CIDR ranges (e.g., "128.114.0.0/16,169.233.0.0/16")
   CAMPUS_SYSTEM_PREFIX: string;    // Additional system prompt prefix for campus mode
   
+  // Sandbox (Daytona) configuration
+  DAYTONA_API_URL: string;         // Control plane URL (e.g. https://app.daytona.io/api)
+  DAYTONA_PROXY_URL: string;       // Toolbox proxy URL (e.g. https://proxy.app.daytona.io/toolbox)
+  DAYTONA_DEPLOYMENT_LABEL: string; // Label prefix for sandbox tagging (e.g. api.bayleaf.dev)
+
   // Secrets (set via wrangler secret put)
   OPENROUTER_PROVISIONING_KEY: string;
   OIDC_CLIENT_ID: string;
   OIDC_CLIENT_SECRET: string;
   CAMPUS_POOL_KEY: string;         // Shared OpenRouter key for campus access
+  DAYTONA_API_KEY: string;         // Sandbox provider API key
 }
 
 export interface Session {
@@ -67,6 +73,7 @@ export interface UserKeyRow {
   or_key_secret: string;
   revoked: number;           // 0 = active, 1 = revoked
   created_at: string;
+  daytona_sandbox_id: string | null;  // cached sandbox ID (null = not yet provisioned)
 }
 
 /** Hono app environment type */

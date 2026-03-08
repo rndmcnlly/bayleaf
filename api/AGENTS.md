@@ -1,8 +1,8 @@
 # BayLeaf API
 
-Cloudflare Worker built with **Hono**: OIDC auth (UCSC Google), OpenRouter key provisioning, LLM proxy with system prompt injection, Campus Pass (IP-based auth).
+Cloudflare Worker built with **Hono**: OIDC auth (UCSC Google), OpenRouter key provisioning, LLM proxy with system prompt injection, sandboxed code execution (Daytona), Campus Pass (IP-based auth).
 
-**Architecture**: Multi-file TypeScript under `src/`, D1 for proxy key mappings. Hono handles routing, CORS, and response helpers. Bundled by Wrangler.
+**Architecture**: Multi-file TypeScript under `src/`, D1 for key mappings + cached sandbox IDs. Hono handles routing, CORS, and response helpers. Bundled by Wrangler.
 
 ## Commands
 
@@ -17,22 +17,24 @@ npx tsc --noEmit # Type check
 ```
 src/
   index.ts              Entry point: Hono app, cors middleware, route mounting, error handler
-  types.ts              Bindings, Session, OpenRouterKey, AppEnv (Hono generics)
-  constants.ts          GOOGLE_OIDC, OPENROUTER_API, cookie config
+  types.ts              Bindings, Session, OpenRouterKey, UserKeyRow, AppEnv (Hono generics)
+  constants.ts          GOOGLE_OIDC, OPENROUTER_API, DAYTONA defaults, cookie config
   openrouter.ts         OpenRouter API helpers (findKeyByName, createKey, deleteKey)
+  daytona.ts            Daytona sandbox API client (lifecycle, exec, file ops)
   utils/
-    auth.ts             resolveAuth(): shared auth for proxy routes (Campus Pass, Bayleaf token, raw key)
+    auth.ts             resolveAuth(): shared auth for proxy + sandbox routes (Campus Pass, Bayleaf token, raw key)
     ip.ts               IP range parsing, campus pass checks
     session.ts          HMAC session tokens, cookie helpers
   templates/
     layout.ts           Base HTML layout, errorPage, recommendedModelHint
     landing.ts          Landing page template
-    dashboard.ts        Dashboard page template (key management UI + client JS)
+    dashboard.ts        Dashboard page template (key card, LLM card, sandbox card + client JS)
   routes/
     auth.ts             authRoutes: /login, /callback, /logout
-    dashboard.ts        dashboardRoutes: /, /dashboard
+    dashboard.ts        dashboardRoutes: /, /dashboard (self-heals sandbox ID cache)
     key.ts              keyRoutes: GET|POST|DELETE /key
     proxy.ts            proxyRoutes: POST /responses, /v1/* catch-all
+    sandbox.ts          sandboxRoutes: POST /exec, GET|PUT /files/*, DELETE /
 ```
 
 ## Code Style
@@ -56,6 +58,9 @@ src/
 /logout            Clear         /dashboard     User UI         /key        GET|POST|DELETE
 /v1/responses      Responses API proxy (system prompt via instructions field)
 /v1/*              Chat/general proxy (system prompt via system message)
+/sandbox/exec      POST: bash execution (campus-pass: ephemeral, keyed: persistent)
+/sandbox/files/*   GET: download file, PUT: upload file (keyed only)
+/sandbox           DELETE: destroy user's sandbox (keyed or session)
 ```
 
 ## Don'ts
