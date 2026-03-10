@@ -12,6 +12,7 @@
 
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import type { Context } from 'hono';
+import { proxy } from 'hono/proxy';
 import type { AppEnv } from '../types';
 import { OPENROUTER_API } from '../constants';
 import { resolveAuth, type AuthResult } from '../utils/auth';
@@ -49,7 +50,7 @@ async function forwardJson(
   authorization: string,
   body: unknown,
 ): Promise<Response> {
-  const response = await fetch(url, {
+  const res = await proxy(url, {
     method: 'POST',
     headers: {
       'Authorization': authorization,
@@ -57,14 +58,8 @@ async function forwardJson(
     },
     body: JSON.stringify(body),
   });
-
-  const responseHeaders = new Headers(response.headers);
-  responseHeaders.set('Access-Control-Allow-Origin', '*');
-
-  return new Response(response.body, {
-    status: response.status,
-    headers: responseHeaders,
-  });
+  res.headers.set('Access-Control-Allow-Origin', '*');
+  return res;
 }
 
 // ── POST /responses — Responses API proxy ─────────────────────────
@@ -279,27 +274,19 @@ async function handleProxy(c: Context<AppEnv>): Promise<Response> {
   const path = url.pathname.replace('/v1', '');
   const openRouterUrl = `${OPENROUTER_API}${path}${url.search}`;
 
-  const headers = new Headers(c.req.raw.headers);
-  headers.delete('host');
-
   const auth = await resolveAuth(c);
   if (auth instanceof Response) return auth;
 
-  headers.set('Authorization', auth.authorization);
-
-  const response = await fetch(openRouterUrl, {
-    method: c.req.method,
-    headers,
-    body: c.req.method !== 'GET' && c.req.method !== 'HEAD' ? c.req.raw.body : undefined,
+  const res = await proxy(openRouterUrl, {
+    ...c.req,
+    headers: {
+      ...c.req.header(),
+      Authorization: auth.authorization,
+      host: undefined,
+    },
   });
-
-  const responseHeaders = new Headers(response.headers);
-  responseHeaders.set('Access-Control-Allow-Origin', '*');
-
-  return new Response(response.body, {
-    status: response.status,
-    headers: responseHeaders,
-  });
+  res.headers.set('Access-Control-Allow-Origin', '*');
+  return res;
 }
 
 // Proxy passthrough: the handler returns a raw Response from OpenRouter,

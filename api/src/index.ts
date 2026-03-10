@@ -15,7 +15,7 @@
 import { OpenAPIHono, createRoute } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
 import type { AppEnv } from './types';
-import { errorPage } from './templates/layout';
+import { renderErrorPage } from './templates/layout';
 import { getModelName } from './openrouter';
 import { authRoutes } from './routes/auth';
 import { dashboardRoutes } from './routes/dashboard';
@@ -129,13 +129,13 @@ app.doc31('/docs/openapi.json', (c) => ({
 
 // ── 404 fallback ──────────────────────────────────────────────────
 
-app.notFound((c) => c.html(errorPage('Not Found', 'The page you requested does not exist.'), 404));
+app.notFound((c) => c.html(renderErrorPage('Not Found', 'The page you requested does not exist.'), 404));
 
 // ── Error handler ─────────────────────────────────────────────────
 
 app.onError((err, c) => {
   console.error('Unhandled error:', err);
-  return c.html(errorPage('Server Error', 'An unexpected error occurred.'), 500);
+  return c.html(renderErrorPage('Server Error', 'An unexpected error occurred.'), 500);
 });
 
 export default app;

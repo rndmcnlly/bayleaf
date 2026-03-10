@@ -9,8 +9,8 @@ import { getSession } from '../utils/session';
 import { isCampusPassEligible } from '../utils/ip';
 import { getKeyName, findKeyByHash, createKey } from '../openrouter';
 import { findSandboxByLabel, getSandboxInfo, type SandboxInfo } from '../daytona';
-import { landingPage } from '../templates/landing';
-import { dashboardPage } from '../templates/dashboard';
+import { LandingPage } from '../templates/landing';
+import { DashboardPage } from '../templates/dashboard';
 
 export const dashboardRoutes = new OpenAPIHono<AppEnv>();
 
@@ -18,7 +18,7 @@ export const dashboardRoutes = new OpenAPIHono<AppEnv>();
 dashboardRoutes.get('/', async (c) => {
   const session = await getSession(c);
   if (session) return c.redirect('/dashboard');
-  return c.html(landingPage(isCampusPassEligible(c.req.raw, c.env), c.env.RECOMMENDED_MODEL));
+  return c.html(<LandingPage showCampusPass={isCampusPassEligible(c.req.raw, c.env)} recommendedModel={c.env.RECOMMENDED_MODEL} />);
 });
 
 /** GET /dashboard - Main user interface */
@@ -76,5 +76,5 @@ dashboardRoutes.get('/dashboard', async (c) => {
     }
   }
 
-  return c.html(dashboardPage(session, row, orKey, c.env.RECOMMENDED_MODEL, sandboxInfo));
+  return c.html(<DashboardPage session={session} row={row} orKey={orKey} recommendedModel={c.env.RECOMMENDED_MODEL} sandboxInfo={sandboxInfo} />);
 });

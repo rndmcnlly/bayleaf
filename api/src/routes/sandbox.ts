@@ -206,10 +206,14 @@ sandboxRoutes.openapi(execRoute, async (c) => {
 });
 
 // ── GET /files/* ───────────────────────────────────────────────────
+// File routes use plain Hono handlers (not .openapi()) because the path
+// contains a multi-segment wildcard that @hono/zod-openapi's {param}
+// syntax can't capture — it maps to Hono's `:param` which matches only
+// one segment. We register the OpenAPI docs manually instead.
 
-const downloadFileRoute = createRoute({
+sandboxRoutes.openAPIRegistry.registerPath({
   method: 'get',
-  path: '/files/{path}',
+  path: '/sandbox/files/{path}',
   operationId: 'sandboxDownloadFile',
   tags: ['Sandbox'],
   summary: 'Download a file',
@@ -228,11 +232,7 @@ const downloadFileRoute = createRoute({
   responses: {
     200: {
       description: 'File contents',
-      content: { 'application/octet-stream': { schema: z.string() } },
-    },
-    400: {
-      description: 'Missing file path',
-      content: { 'application/json': { schema: ApiErrorSchema } },
+      content: { 'application/octet-stream': { schema: { type: 'string', format: 'binary' } } },
     },
     403: {
       description: 'File access requires a BayLeaf API key',
@@ -249,10 +249,9 @@ const downloadFileRoute = createRoute({
   },
 });
 
-sandboxRoutes.openapi(downloadFileRoute, async (c) => {
+sandboxRoutes.get('/files/*', async (c) => {
   const auth = await resolveAuth(c);
-  // Auth guard — see note on execRoute handler.
-  if (auth instanceof Response) return auth as any;
+  if (auth instanceof Response) return auth;
 
   if (auth.isCampusMode || !auth.userEmail) {
     return c.json({
@@ -260,7 +259,9 @@ sandboxRoutes.openapi(downloadFileRoute, async (c) => {
     }, 403);
   }
 
-  const filePath = '/' + c.req.valid('param').path;
+  // Extract the file path from the URL. c.req.path includes the full path
+  // (with the /sandbox mount prefix), e.g. /sandbox/files/home/daytona/...
+  const filePath = c.req.path.replace(/^\/sandbox\/files/, '');
 
   try {
     const sandboxId = await resolveSandboxId(auth.userEmail, c.env);
@@ -272,11 +273,10 @@ sandboxRoutes.openapi(downloadFileRoute, async (c) => {
       return c.json({ error: { message, code: status } }, status as 404 | 502);
     }
 
-    // Binary passthrough: forwarding raw file bytes from the sandbox
-    // provider — not a typed Hono response.
+    // Binary passthrough: forwarding raw file bytes from the sandbox provider.
     const headers = new Headers(resp.headers);
     headers.set('Access-Control-Allow-Origin', '*');
-    return new Response(resp.body, { status: 200, headers }) as any;
+    return new Response(resp.body, { status: 200, headers });
   } catch (e) {
     console.error('Sandbox file download error:', e);
     return c.json({
@@ -287,9 +287,9 @@ sandboxRoutes.openapi(downloadFileRoute, async (c) => {
 
 // ── PUT /files/* ───────────────────────────────────────────────────
 
-const uploadFileRoute = createRoute({
+sandboxRoutes.openAPIRegistry.registerPath({
   method: 'put',
-  path: '/files/{path}',
+  path: '/sandbox/files/{path}',
   operationId: 'sandboxUploadFile',
   tags: ['Sandbox'],
   summary: 'Upload a file',
@@ -309,7 +309,7 @@ const uploadFileRoute = createRoute({
       required: true,
       content: {
         'application/octet-stream': {
-          schema: z.string(),
+          schema: { type: 'string', format: 'binary' },
         },
       },
     },
@@ -320,13 +320,8 @@ const uploadFileRoute = createRoute({
       content: {
         'application/json': {
           schema: SandboxUploadResponseSchema,
-          example: { success: true, path: '/home/daytona/workspace/input.txt', bytes: 1234 },
         },
       },
-    },
-    400: {
-      description: 'Missing file path',
-      content: { 'application/json': { schema: ApiErrorSchema } },
     },
     403: {
       description: 'File access requires a BayLeaf API key',
@@ -339,10 +334,9 @@ const uploadFileRoute = createRoute({
   },
 });
 
-sandboxRoutes.openapi(uploadFileRoute, async (c) => {
+sandboxRoutes.put('/files/*', async (c) => {
   const auth = await resolveAuth(c);
-  // Auth guard — see note on execRoute handler.
-  if (auth instanceof Response) return auth as any;
+  if (auth instanceof Response) return auth;
 
   if (auth.isCampusMode || !auth.userEmail) {
     return c.json({
@@ -350,7 +344,7 @@ sandboxRoutes.openapi(uploadFileRoute, async (c) => {
     }, 403);
   }
 
-  const filePath = '/' + c.req.valid('param').path;
+  const filePath = c.req.path.replace(/^\/sandbox\/files/, '');
 
   try {
     const body = await c.req.arrayBuffer();
