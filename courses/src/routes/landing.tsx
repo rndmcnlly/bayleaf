@@ -6,7 +6,7 @@
  */
 
 import { Hono } from 'hono';
-import type { AppEnv, CourseRow, MembershipRow } from '../types';
+import type { AppEnv, CourseRow } from '../types';
 import { BaseLayout, btnStyle, cardStyle } from '../templates/layout';
 import { getSession } from '../utils/session';
 
@@ -42,12 +42,7 @@ landingRoutes.get('/', async (c) => {
   // Logged in — fetch data
   const email = session.email;
 
-  // Courses with a pending claim by this user
-  const pendingClaims = await c.env.DB.prepare(
-    `SELECT * FROM courses WHERE claim_email = ? ORDER BY created_at DESC`
-  ).bind(email).all<CourseRow>();
-
-  // Courses where the user is staff (verified)
+  // Staff courses from D1 (staff membership is still authoritative in D1)
   const staffCourses = await c.env.DB.prepare(
     `SELECT c.* FROM courses c
      JOIN memberships m ON c.canvas_course_id = m.canvas_course_id
@@ -55,22 +50,41 @@ landingRoutes.get('/', async (c) => {
      ORDER BY c.created_at DESC`
   ).bind(email).all<CourseRow>();
 
-  // Courses where the user is enrolled (student)
-  const enrolledCourses = await c.env.DB.prepare(
-    `SELECT c.* FROM courses c
-     JOIN memberships m ON c.canvas_course_id = m.canvas_course_id
-     WHERE m.email = ? AND m.role = 'user'
-     ORDER BY c.name`
-  ).bind(email).all<CourseRow>();
+  // Published courses from D1
+  const publishedRows = await c.env.DB.prepare(
+    `SELECT * FROM courses WHERE published = 1 ORDER BY name`
+  ).all<CourseRow>();
 
-  // All published courses (for browse)
-  const publishedCourses = await c.env.DB.prepare(
-    `SELECT c.*, COUNT(m.email) as user_count FROM courses c
-     LEFT JOIN memberships m ON c.canvas_course_id = m.canvas_course_id AND m.role = 'user'
-     WHERE c.published = 1
-     GROUP BY c.canvas_course_id
-     ORDER BY c.name`
-  ).all<CourseRow & { user_count: number }>();
+  // Student enrollment comes from OWUI (source of truth).
+  // One call to list all course models, one call to resolve current user.
+  const owuiUser = await c.var.chatDAL.searchUserByEmail(email);
+  const courseModels = await c.var.chatDAL.listCourseModels();
+
+  // Build lookup: course ID → { studentCount, isEnrolled }
+  const enrollmentInfo = new Map<number, { studentCount: number; isEnrolled: boolean }>();
+  for (const model of courseModels) {
+    const idMatch = model.id.match(/^course-(\d+)$/);
+    if (!idMatch) continue;
+    const cid = parseInt(idMatch[1], 10);
+    const staffUserIds = new Set(
+      model.access_grants.filter((g) => g.permission === 'write').map((g) => g.principal_id)
+    );
+    const readGrants = model.access_grants.filter(
+      (g) => g.principal_type === 'user' && g.permission === 'read' && !staffUserIds.has(g.principal_id)
+    );
+    enrollmentInfo.set(cid, {
+      studentCount: readGrants.length,
+      isEnrolled: owuiUser ? readGrants.some((g) => g.principal_id === owuiUser.id) : false,
+    });
+  }
+
+  // Derive enrolled courses list from OWUI data + D1 course names
+  const enrolledCourseIds = new Set(
+    [...enrollmentInfo.entries()].filter(([, info]) => info.isEnrolled).map(([cid]) => cid)
+  );
+  const enrolledCourses = publishedRows.results.filter(
+    (c) => enrolledCourseIds.has(c.canvas_course_id)
+  );
 
   return c.html(
     <BaseLayout title="Home">
@@ -95,23 +109,6 @@ landingRoutes.get('/', async (c) => {
         </form>
       </div>
 
-      {/* Pending claims */}
-      {pendingClaims.results.length > 0 && (
-        <div>
-          <h2>Pending Claims</h2>
-          {pendingClaims.results.map((course) => (
-            <div class={cardStyle} key={course.canvas_course_id} style="border-color: #e67e22;">
-              <h3 style="margin-top: 0;">
-                <a href={`/courses/${course.canvas_course_id}`}>{course.name}</a>
-              </h3>
-              <p style="color: #e67e22; font-size: 0.9rem;">
-                Awaiting verification &mdash; <a href={`/courses/${course.canvas_course_id}`}>complete claim</a>
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
-
       {/* Staff courses */}
       {staffCourses.results.length > 0 && (
         <div>
@@ -125,9 +122,6 @@ landingRoutes.get('/', async (c) => {
                 {course.published
                   ? <span style="color: #28a745;">Published</span>
                   : <span style="color: #dc3545;">Not published</span>}
-                {course.prompt_text.startsWith('CLAIM:') && (
-                  <span> &middot; <span style="color: #e67e22;">Claim pending</span></span>
-                )}
               </p>
             </div>
           ))}
@@ -135,10 +129,10 @@ landingRoutes.get('/', async (c) => {
       )}
 
       {/* Enrolled courses */}
-      {enrolledCourses.results.length > 0 && (
+      {enrolledCourses.length > 0 && (
         <div>
           <h2>Your Installed Models</h2>
-          {enrolledCourses.results.map((course) => (
+          {enrolledCourses.map((course) => (
             <div class={cardStyle} key={course.canvas_course_id}>
               <h3 style="margin-top: 0;">
                 <a href={`/courses/${course.canvas_course_id}`}>{course.name}</a>
@@ -153,13 +147,13 @@ landingRoutes.get('/', async (c) => {
 
       {/* Published courses browse */}
       <h2>All Published Courses</h2>
-      {publishedCourses.results.length === 0 ? (
+      {publishedRows.results.length === 0 ? (
         <p style="color: #666;">No courses published yet.</p>
       ) : (
-        publishedCourses.results.map((course) => {
-          const isEnrolled = enrolledCourses.results.some(
-            (e) => e.canvas_course_id === course.canvas_course_id
-          );
+        publishedRows.results.map((course) => {
+          const info = enrollmentInfo.get(course.canvas_course_id);
+          const studentCount = info?.studentCount ?? 0;
+          const isEnrolled = info?.isEnrolled ?? false;
           return (
             <div class={cardStyle} key={course.canvas_course_id}>
               <div style="display: flex; justify-content: space-between; align-items: baseline;">
@@ -167,7 +161,7 @@ landingRoutes.get('/', async (c) => {
                   <a href={`/courses/${course.canvas_course_id}`}>{course.name}</a>
                 </h3>
                 <span style="color: #666; font-size: 0.85rem;">
-                  {course.user_count} student{course.user_count !== 1 ? 's' : ''}
+                  {studentCount} student{studentCount !== 1 ? 's' : ''}
                 </span>
               </div>
               {isEnrolled ? (

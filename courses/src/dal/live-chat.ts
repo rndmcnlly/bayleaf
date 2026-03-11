@@ -27,7 +27,7 @@ export function createLiveChatDAL(env: Bindings): ChatDAL {
       return data.users.find((u) => u.email === email) ?? null;
     },
 
-    async createModel(id, name, baseModelId, systemPrompt, accessGrants) {
+    async createModel(id, name, description, baseModelId, systemPrompt, accessGrants) {
       const res = await fetch(`${base}/api/v1/models/create`, {
         method: 'POST',
         headers,
@@ -35,7 +35,7 @@ export function createLiveChatDAL(env: Bindings): ChatDAL {
           id,
           name,
           base_model_id: baseModelId,
-          meta: { description: `Course model: ${name}` },
+          meta: { description },
           params: { system: systemPrompt },
           access_grants: accessGrants,
           is_active: true,
@@ -98,6 +98,16 @@ export function createLiveChatDAL(env: Bindings): ChatDAL {
         return null;
       }
       return await res.json() as ChatModel;
+    },
+
+    async listCourseModels() {
+      const res = await fetch(`${base}/api/v1/models/list`, { headers });
+      if (!res.ok) {
+        console.error(`[chat-dal] List models failed: ${res.status}`);
+        return [];
+      }
+      const data = await res.json() as { items: ChatModel[]; total: number };
+      return data.items.filter((m) => m.id.startsWith('course-'));
     },
 
     async deleteModel(id) {

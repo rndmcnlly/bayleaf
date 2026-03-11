@@ -29,13 +29,13 @@ export function createMockChatDAL(): ChatDAL {
       return MOCK_USERS.find((u) => u.email === email) ?? null;
     },
 
-    async createModel(id, name, baseModelId, systemPrompt, accessGrants) {
+    async createModel(id, name, description, baseModelId, systemPrompt, accessGrants) {
       const model: ChatModel = {
         id,
         name,
         base_model_id: baseModelId,
         params: { system: systemPrompt },
-        meta: { description: `Course model: ${name}` },
+        meta: { description },
         access_grants: accessGrants.map((g) => toFullGrant(id, g)),
         is_active: true,
       };
@@ -68,6 +68,10 @@ export function createMockChatDAL(): ChatDAL {
       model.access_grants = grants.map((g) => toFullGrant(id, g));
       console.log(`[mock-chat] Set ${grants.length} grants on model ${id}`);
       return model;
+    },
+
+    async listCourseModels() {
+      return Array.from(models.values()).filter((m) => m.id.startsWith('course-'));
     },
 
     async deleteModel(id) {

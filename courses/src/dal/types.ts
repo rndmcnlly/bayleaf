@@ -48,6 +48,7 @@ export interface ChatDAL {
   createModel(
     id: string,
     name: string,
+    description: string,
     baseModelId: string,
     systemPrompt: string,
     accessGrants: AccessGrant[],
@@ -61,6 +62,9 @@ export interface ChatDAL {
 
   /** Replace all access grants on a model. */
   setModelAccessGrants(id: string, grants: AccessGrant[]): Promise<ChatModel | null>;
+
+  /** List all course-* models with their access grants. */
+  listCourseModels(): Promise<ChatModel[]>;
 
   /** Delete a model. */
   deleteModel(id: string): Promise<boolean>;

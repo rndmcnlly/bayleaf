@@ -60,69 +60,25 @@ courses/src/
 
 ---
 
-## Known Issue: Claim Flow Needs Rework
+## Claim Flow (Reworked)
 
-The current claim flow has a design problem that was identified during manual
-testing but not yet fixed.
+The claim flow was reworked to eliminate the `claim_email` blocking problem.
+The Canvas page claim code is the sole security gate — not per-user locks.
 
-### The Problem
+**How it works now:**
 
-When someone registers a course (POST /courses), a `courses` row is created
-with `claim_email` set to their email, and other users are blocked from
-claiming the same course. This is wrong because:
-
-1. A **student** might paste a course URL out of curiosity, see the claim
-   instructions, realize they can't create a Canvas page, close the tab, and
-   never come back. The course is now stuck — the student won't remember to
-   cancel, and the real instructor can't claim it.
-
-2. The cancel-claim button exists but requires the student to navigate back
-   and explicitly cancel. Students who chicken out won't do this.
-
-### The Intended Fix
-
-**Don't block concurrent claims.** The claim code on the Canvas page is the
-real security gate — only someone who can edit the Canvas page can verify.
-So the flow should be:
-
-1. **Anyone** can POST /courses with a Canvas URL and get a claim code.
-2. If the course already exists and is pending, show them the **same claim
-   instructions** with a **fresh claim code** (regenerate and update the
-   row). This means the last person to register gets the active code —
-   earlier codes become stale, which is fine.
+1. Anyone can POST /courses with a Canvas URL and get a claim code.
+2. If the course already exists and is pending, a **fresh claim code** is
+   generated (the last registrant gets the active code; earlier codes go stale).
 3. If the course is already verified/published, redirect to the detail page.
-4. **Anyone** can POST /courses/:id/verify. The Canvas page check is the
-   auth — if the page contains the current claim code, whoever submitted
-   the verify request becomes staff.
-5. Remove the `claim_email` column and the `cancel-claim` route entirely.
-   Pending claims are self-healing: a new registration just overwrites
-   the stale claim code.
+4. Anyone can POST /courses/:id/verify. The Canvas page check is the auth —
+   if the page contains the current claim code, whoever verified becomes staff.
+5. The `claim_email` column and `cancel-claim` route have been removed entirely.
+   Pending claims are self-healing: a new registration just overwrites the stale code.
 
-### What to Change
-
-In `courses.tsx`:
-- **POST /courses**: If course exists and is pending (`prompt_text` starts
-  with `CLAIM:`), regenerate the claim code, update the row, and show
-  instructions. Remove the `claim_email` blocking logic.
-- **POST /courses/:id/verify**: Remove the `claim_email !== email` guard.
-  Anyone who can prove Canvas page ownership gets staff.
-- **DELETE the cancel-claim route**. No longer needed.
-- **GET /courses/:id**: For pending courses, show claim instructions to
-  everyone (not just the claimant). Anyone can attempt to verify.
-
-In `landing.tsx`:
-- Remove the "Pending Claims" section (no longer user-specific). Pending
-  courses are just unverified — don't show them in listings at all, or
-  show them generically.
-
-In `types.ts`:
-- `claim_email` can be kept in `CourseRow` for now (column exists in D1)
-  but stop reading/writing it.
-
-### Migration
-
-A migration to drop `claim_email` is optional — SQLite ALTER TABLE DROP
-COLUMN works in newer versions but it's simpler to just ignore the column.
+**D1 schema was consolidated** — the `0002_add_claim_email.sql` migration was
+deleted and remote D1 was rebuilt from a clean single migration. No `claim_email`
+column exists anywhere.
 
 ---
 

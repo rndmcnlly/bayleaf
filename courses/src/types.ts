@@ -52,7 +52,6 @@ export interface CourseRow {
   canvas_page_url: string | null;
   owui_model_id: string | null;
   published: number;
-  claim_email: string | null;      // who initiated the claim (null after verification)
   created_at: string;
 }
 

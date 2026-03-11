@@ -23,7 +23,7 @@
 
   "vars": {
     "ALLOWED_EMAIL_DOMAIN": "ucsc.edu",
-    "DEFAULT_BASE_MODEL": "openai/gpt-4.1-mini",
+    "DEFAULT_BASE_MODEL": "openrouter.z-ai/glm-5",
     "OWUI_BASE_URL": "https://chat.bayleaf.dev"
   },
 

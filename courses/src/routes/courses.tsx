@@ -25,7 +25,6 @@ function modelId(courseId: number): string {
 courseRoutes.post('/courses', async (c) => {
   const body = await c.req.parseBody();
   const canvasUrl = (body['canvas_url'] as string ?? '').trim();
-  const email = c.var.session.email;
 
   const courseId = extractCanvasCourseId(canvasUrl);
   if (!courseId) {
@@ -47,24 +46,46 @@ courseRoutes.post('/courses', async (c) => {
   ).bind(courseId).first<CourseRow>();
 
   if (existing) {
-    // If it's a pending claim by someone else, tell the user
-    if (existing.prompt_text.startsWith('CLAIM:') && existing.claim_email && existing.claim_email !== email) {
-      return c.html(
-        <BaseLayout title="Claim Pending">
-          <div class={cardStyle} style="border-color: #e67e22;">
-            <h2 style="color: #e67e22; margin-top: 0;">Claim Already Pending</h2>
-            <p>
-              Someone else has already started claiming <strong>{existing.name}</strong>.
-              If you believe this is an error, ask them to cancel their claim, or wait
-              for it to expire.
-            </p>
-            <p><a href="/">Go back</a></p>
-          </div>
-        </BaseLayout>,
-      );
+    // Already verified or published — go to the detail page
+    if (!existing.prompt_text.startsWith('CLAIM:')) {
+      return c.redirect(`/courses/${courseId}`, 302);
     }
-    // Otherwise redirect to the detail page (their own pending claim, or verified course)
-    return c.redirect(`/courses/${courseId}`, 302);
+
+    // Pending claim — regenerate code so the latest registrant gets the active code.
+    // Earlier codes become stale, which is fine — Canvas page check is the real gate.
+    const freshCode = generateClaimCode();
+    await c.env.DB.prepare(
+      `UPDATE courses SET prompt_text = ? WHERE canvas_course_id = ?`
+    ).bind(freshCode, courseId).run();
+
+    // In mock mode, inject the new code so verify works locally
+    if (c.env.USE_MOCK_DALS === 'true') {
+      injectClaimCode(courseId, freshCode);
+    }
+
+    return c.html(
+      <BaseLayout title="Claim Your Course">
+        <h2>Claim: {existing.name}</h2>
+        <div class={cardStyle}>
+          <p>To verify you have instructor access to this course, follow these steps:</p>
+          <ol>
+            <li>Go to your course on Canvas: <a href={canvasUrl} target="_blank">{canvasUrl}</a></li>
+            <li>Create a new <strong>Page</strong> titled exactly: <code>BayLeaf AI</code></li>
+            <li>Paste this claim code anywhere on the page:
+              <pre style="background: #f4f4f4; padding: 0.5rem 1rem; border-radius: 4px; font-size: 1.1rem; user-select: all;">{freshCode}</pre>
+            </li>
+            <li>Save the page, then click the button below to verify.</li>
+          </ol>
+          <p style="color: #666; font-size: 0.9rem;">
+            Tip: You can also write your AI system prompt on this page (below or above the claim code).
+            After verification, the full page content becomes the model's system prompt.
+          </p>
+        </div>
+        <form method="post" action={`/courses/${courseId}/verify`} style="margin-top: 1rem;">
+          <button type="submit" class={btnStyle}>Verify Claim</button>
+        </form>
+      </BaseLayout>,
+    );
   }
 
   // Fetch course info from Canvas
@@ -85,12 +106,12 @@ courseRoutes.post('/courses', async (c) => {
   // Generate claim code
   const claimCode = generateClaimCode();
 
-  // Insert course with claim code in prompt_text and claimant email
+  // Insert course with claim code in prompt_text
   // No staff membership yet — that happens after verification
   await c.env.DB.prepare(
-    `INSERT INTO courses (canvas_course_id, name, base_model, prompt_text, claim_email)
-     VALUES (?, ?, ?, ?, ?)`
-  ).bind(courseId, courseInfo.name, c.env.DEFAULT_BASE_MODEL, claimCode, email).run();
+    `INSERT INTO courses (canvas_course_id, name, base_model, prompt_text)
+     VALUES (?, ?, ?, ?)`
+  ).bind(courseId, courseInfo.name, c.env.DEFAULT_BASE_MODEL, claimCode).run();
 
   // In mock mode, auto-inject claim code so verify flow works without real Canvas
   if (c.env.USE_MOCK_DALS === 'true') {
@@ -151,20 +172,7 @@ courseRoutes.post('/courses/:id/verify', async (c) => {
     return c.redirect(`/courses/${courseId}`, 302);
   }
 
-  // Only the person who initiated the claim can verify
-  if (course.claim_email !== email) {
-    return c.html(
-      <BaseLayout title="Unauthorized">
-        <div class={errorStyle}>
-          <h2>Not Authorized</h2>
-          <p>Only the person who registered this course can verify the claim.</p>
-          <p><a href="/">Go back</a></p>
-        </div>
-      </BaseLayout>,
-      403,
-    );
-  }
-
+  // Anyone can attempt verification — the Canvas page check is the real auth gate.
   // Read the "BayLeaf AI" page from Canvas
   const page = await c.var.canvasDAL.getPageByTitle(courseId, 'bayleaf-ai');
   if (!page) {
@@ -197,16 +205,15 @@ courseRoutes.post('/courses/:id/verify', async (c) => {
     );
   }
 
-  // Claim verified! Strip HTML from the page body and remove the claim code
-  // Remove the claim code from the page text (with any surrounding whitespace)
+  // Claim verified! Strip HTML from the page body and remove the claim code.
+  // Also strip any stale CLAIM:xxx tokens (from earlier registrations) as a safety net.
   const rawText = stripHtml(page.body);
-  const codePattern = new RegExp(`\\s*${claimCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`);
-  const promptText = rawText.replace(codePattern, ' ').trim();
+  const promptText = rawText.replace(/CLAIM:[a-f0-9]+/g, '').replace(/\s+/g, ' ').trim();
   const pageUrl = `https://canvas.ucsc.edu/courses/${courseId}/pages/${page.url}`;
 
-  // Clear claim state, store prompt
+  // Store verified prompt (claim code is replaced with actual content)
   await c.env.DB.prepare(
-    `UPDATE courses SET prompt_text = ?, canvas_page_url = ?, claim_email = NULL
+    `UPDATE courses SET prompt_text = ?, canvas_page_url = ?
      WHERE canvas_course_id = ?`
   ).bind(promptText, pageUrl, courseId).run();
 
@@ -217,31 +224,6 @@ courseRoutes.post('/courses/:id/verify', async (c) => {
   ).bind(courseId, email).run();
 
   return c.redirect(`/courses/${courseId}`, 302);
-});
-
-// ── POST /courses/:id/cancel-claim — Abandon a pending claim ────
-
-courseRoutes.post('/courses/:id/cancel-claim', async (c) => {
-  const courseId = parseInt(c.req.param('id'), 10);
-  const email = c.var.session.email;
-
-  const course = await c.env.DB.prepare(
-    'SELECT * FROM courses WHERE canvas_course_id = ?'
-  ).bind(courseId).first<CourseRow>();
-
-  if (!course) return c.redirect('/', 302);
-
-  // Only allow cancellation of pending claims, and only by the claimant
-  if (!course.prompt_text.startsWith('CLAIM:') || course.claim_email !== email) {
-    return c.redirect(`/courses/${courseId}`, 302);
-  }
-
-  // Delete the course row entirely — it was never verified
-  await c.env.DB.prepare(
-    'DELETE FROM courses WHERE canvas_course_id = ?'
-  ).bind(courseId).run();
-
-  return c.redirect('/', 302);
 });
 
 // ── POST /courses/:id/publish — Publish model to OWUI ───────────
@@ -301,8 +283,9 @@ courseRoutes.post('/courses/:id/publish', async (c) => {
   // Create the model in OWUI
   const mid = modelId(courseId);
   const displayName = `Course: ${course.name}`;
+  const description = `Canvas course ${courseId}`;
   const model = await c.var.chatDAL.createModel(
-    mid, displayName, course.base_model, course.prompt_text, initialGrants,
+    mid, displayName, description, course.base_model, course.prompt_text, initialGrants,
   );
 
   if (!model) {
@@ -385,25 +368,9 @@ courseRoutes.post('/courses/:id/join', async (c) => {
     await c.var.chatDAL.setModelAccessGrants(mid, newGrants);
   }
 
-  // Record membership (don't clobber an existing staff membership)
-  const existingMembership = await c.env.DB.prepare(
-    `SELECT * FROM memberships WHERE canvas_course_id = ? AND email = ?`
-  ).bind(courseId, email).first<MembershipRow>();
-
-  if (!existingMembership) {
-    await c.env.DB.prepare(
-      `INSERT INTO memberships (canvas_course_id, email, role, owui_user_id)
-       VALUES (?, ?, 'user', ?)`
-    ).bind(courseId, email, owuiUser.id).run();
-  } else if (!existingMembership.owui_user_id) {
-    // Update existing membership with OWUI user ID if missing
-    await c.env.DB.prepare(
-      `UPDATE memberships SET owui_user_id = ? WHERE canvas_course_id = ? AND email = ?`
-    ).bind(owuiUser.id, courseId, email).run();
-  }
-
-  // Success page with deep link
+  // Success page with deep link and instructions
   const deepLink = `${c.env.OWUI_BASE_URL}/?model=${mid}`;
+  const displayName = `Course: ${course.name}`;
   return c.html(
     <BaseLayout title="Installed!">
       <div class={cardStyle} style="background: #d4edda;">
@@ -412,8 +379,11 @@ courseRoutes.post('/courses/:id/join', async (c) => {
         <a href={deepLink} class={btnStyle} target="_blank" style="margin-top: 0.5rem;">
           Open in BayLeaf Chat
         </a>
+        <p style="margin-top: 1rem; color: #555; font-size: 0.9rem;">
+          To find this model later, open <a href={c.env.OWUI_BASE_URL} target="_blank">BayLeaf Chat</a> and
+          select <strong>{displayName}</strong> from the model selector at the top of a new chat.
+        </p>
       </div>
-      <p><a href={`/courses/${courseId}`}>Back to course</a> | <a href="/">All courses</a></p>
     </BaseLayout>,
   );
 });
@@ -424,26 +394,18 @@ courseRoutes.post('/courses/:id/leave', async (c) => {
   const courseId = parseInt(c.req.param('id'), 10);
   const email = c.var.session.email;
 
-  const membership = await c.env.DB.prepare(
-    `SELECT * FROM memberships WHERE canvas_course_id = ? AND email = ? AND role = 'user'`
-  ).bind(courseId, email).first<MembershipRow>();
-
-  if (!membership || !membership.owui_user_id) {
+  const owuiUser = await c.var.chatDAL.searchUserByEmail(email);
+  if (!owuiUser) {
     return c.redirect(`/courses/${courseId}`, 302);
   }
 
-  // Remove from OWUI access grants
+  // Remove read grant from OWUI
   const mid = modelId(courseId);
   const currentGrants = await c.var.chatDAL.getModelAccessGrants(mid);
   const filteredGrants = currentGrants.filter(
-    (g) => !(g.principal_type === 'user' && g.principal_id === membership.owui_user_id && g.permission === 'read')
+    (g) => !(g.principal_type === 'user' && g.principal_id === owuiUser.id && g.permission === 'read')
   );
   await c.var.chatDAL.setModelAccessGrants(mid, filteredGrants);
-
-  // Remove membership
-  await c.env.DB.prepare(
-    `DELETE FROM memberships WHERE canvas_course_id = ? AND email = ? AND role = 'user'`
-  ).bind(courseId, email).run();
 
   return c.redirect(`/courses/${courseId}`, 302);
 });
@@ -570,44 +532,33 @@ courseRoutes.get('/courses/:id', async (c) => {
   }
 
   const isPendingClaim = course.prompt_text.startsWith('CLAIM:');
-  const isClaimant = course.claim_email === email;
 
-  // If claim is pending, show a focused claim-verification page
+  // If claim is pending, show claim-verification instructions to everyone.
+  // Anyone who can put the code on the Canvas page can verify — that's the auth gate.
   if (isPendingClaim) {
     return c.html(
       <BaseLayout title={course.name}>
         <h2>{course.name}</h2>
         <p style="color: #666;">Canvas course {courseId}</p>
 
-        {isClaimant ? (
-          <div class={cardStyle} style="border-color: #e67e22;">
-            <h3 style="color: #e67e22; margin-top: 0;">Claim Pending</h3>
-            <p>To verify you have instructor access, follow these steps:</p>
-            <ol>
-              <li>Go to your course on Canvas: <a href={`https://canvas.ucsc.edu/courses/${courseId}`} target="_blank">canvas.ucsc.edu/courses/{courseId}</a></li>
-              <li>Create a new <strong>Page</strong> titled exactly: <code>BayLeaf AI</code></li>
-              <li>Paste this claim code anywhere on the page:
-                <pre style="background: #f4f4f4; padding: 0.5rem 1rem; border-radius: 4px; font-size: 1.1rem; user-select: all;">{course.prompt_text}</pre>
-              </li>
-              <li>Save the page, then click the button below.</li>
-            </ol>
-            <p style="color: #666; font-size: 0.9rem;">
-              Tip: You can also write your AI system prompt on this page. After verification, the full page content (minus the claim code) becomes the model's system prompt.
-            </p>
-            <div style="display: flex; gap: 1rem; align-items: center; margin-top: 1rem;">
-              <form method="post" action={`/courses/${courseId}/verify`}>
-                <button type="submit" class={btnStyle}>Verify Claim</button>
-              </form>
-              <form method="post" action={`/courses/${courseId}/cancel-claim`}>
-                <button type="submit" style="background: none; border: 1px solid #dc3545; color: #dc3545; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">Cancel Claim</button>
-              </form>
-            </div>
-          </div>
-        ) : (
-          <div class={cardStyle}>
-            <p style="color: #666;">This course has a pending claim and is not yet available.</p>
-          </div>
-        )}
+        <div class={cardStyle} style="border-color: #e67e22;">
+          <h3 style="color: #e67e22; margin-top: 0;">Awaiting Verification</h3>
+          <p>This course hasn't been verified yet. If you're an instructor, follow these steps to claim it:</p>
+          <ol>
+            <li>Go to your course on Canvas: <a href={`https://canvas.ucsc.edu/courses/${courseId}`} target="_blank">canvas.ucsc.edu/courses/{courseId}</a></li>
+            <li>Create a new <strong>Page</strong> titled exactly: <code>BayLeaf AI</code></li>
+            <li>Paste this claim code anywhere on the page:
+              <pre style="background: #f4f4f4; padding: 0.5rem 1rem; border-radius: 4px; font-size: 1.1rem; user-select: all;">{course.prompt_text}</pre>
+            </li>
+            <li>Save the page, then click the button below.</li>
+          </ol>
+          <p style="color: #666; font-size: 0.9rem;">
+            Tip: You can also write your AI system prompt on this page. After verification, the full page content (minus the claim code) becomes the model's system prompt.
+          </p>
+          <form method="post" action={`/courses/${courseId}/verify`} style="margin-top: 1rem;">
+            <button type="submit" class={btnStyle}>Verify Claim</button>
+          </form>
+        </div>
 
         <p style="margin-top: 2rem;"><a href="/">Back to all courses</a></p>
       </BaseLayout>,
@@ -619,15 +570,30 @@ courseRoutes.get('/courses/:id', async (c) => {
     `SELECT * FROM memberships WHERE canvas_course_id = ? AND role = 'staff'`
   ).bind(courseId).all<MembershipRow>();
 
-  const userRows = await c.env.DB.prepare(
-    `SELECT * FROM memberships WHERE canvas_course_id = ? AND role = 'user'`
-  ).bind(courseId).all<MembershipRow>();
-
   const isStaff = staffRows.results.some((m) => m.email === email);
-  const isUser = userRows.results.some((m) => m.email === email);
-  const userCount = userRows.results.length;
 
-  const deepLink = `${c.env.OWUI_BASE_URL}/?model=${modelId(courseId)}`;
+  // Student enrollment comes from OWUI access grants (source of truth)
+  const mid = modelId(courseId);
+  const deepLink = `${c.env.OWUI_BASE_URL}/?model=${mid}`;
+  let isUser = false;
+  let userCount = 0;
+
+  if (course.published) {
+    const grants = await c.var.chatDAL.getModelAccessGrants(mid);
+    const staffUserIds = new Set(
+      grants.filter((g) => g.permission === 'write').map((g) => g.principal_id)
+    );
+    const readGrants = grants.filter(
+      (g) => g.principal_type === 'user' && g.permission === 'read' && !staffUserIds.has(g.principal_id)
+    );
+    userCount = readGrants.length;
+
+    // Check if current user is enrolled
+    const owuiUser = await c.var.chatDAL.searchUserByEmail(email);
+    if (owuiUser) {
+      isUser = readGrants.some((g) => g.principal_id === owuiUser.id);
+    }
+  }
 
   return c.html(
     <BaseLayout title={course.name}>
