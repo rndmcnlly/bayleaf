@@ -181,20 +181,30 @@ proxyRoutes.openapi(chatCompletionsRoute, async (c) => {
   if (auth instanceof Response) return auth as any;
 
   const body = c.req.valid('json') as {
-    messages?: Array<{ role: string; content?: string | null; [k: string]: unknown }>;
+    messages?: Array<{ role: string; content?: unknown; [k: string]: unknown }>;
     user?: string;
     [k: string]: unknown;
   };
 
   if (body.messages && Array.isArray(body.messages)) {
     const systemPrefix = buildSystemPrefix(c.env, auth.isCampusMode);
-    const systemIndex = body.messages.findIndex(m => m.role === 'system');
+    // Look for system or developer message (developer replaces system on newer models)
+    const systemIndex = body.messages.findIndex(
+      m => m.role === 'system' || m.role === 'developer',
+    );
 
     if (systemIndex >= 0) {
-      const existing = body.messages[systemIndex].content;
-      body.messages[systemIndex].content = existing
-        ? systemPrefix + '\n\n' + existing
-        : systemPrefix;
+      const msg = body.messages[systemIndex];
+      const existing = msg.content;
+      if (typeof existing === 'string') {
+        msg.content = systemPrefix + '\n\n' + existing;
+      } else if (Array.isArray(existing)) {
+        // Content is an array of content parts — prepend as a text part
+        existing.unshift({ type: 'text', text: systemPrefix + '\n\n' });
+      } else {
+        // null, undefined, or unexpected — replace with prefix string
+        msg.content = systemPrefix;
+      }
     } else {
       body.messages.unshift({ role: 'system', content: systemPrefix });
     }
