@@ -87,9 +87,3 @@ the project, revised as the argument sharpens, and visible to anyone at any
 stage — in the tradition of
 [open notebook science](https://en.wikipedia.org/wiki/Open-notebook_science),
 where the process is public record, not just the findings.
-
-- [**POSITION.md**](POSITION.md) — The full argument: infrastructure is pedagogy.
-- [**COMPARISON.md**](COMPARISON.md) — BayLeaf vs. enterprise AI products on the
-  criteria that matter.
-- [**DEPENDENCIES.md**](DEPENDENCIES.md) — Honest accounting of every external
-  dependency, who owns it, and what the exit path looks like.
