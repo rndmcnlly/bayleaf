@@ -55,6 +55,16 @@ any third-party provider.
 This repo is **publicly visible**. It never contains API keys, credentials, or
 other sensitive configuration.
 
+## GenAI Disclosure
+
+Nearly 100% of the code, documentation, and other project data in this
+repository was created using generative AI in agentic coding tools. This is an
+intentional choice: it demonstrates that sufficient technical capacity exists
+within the university to build and operate a service like this, without ceding
+control or responsibility to external parties. Critics, allies, and other humans
+seeking a direct human connection should contact
+[Adam Smith](mailto:amsmith@ucsc.edu) directly.
+
 ## Contact
 
 [Adam Smith](mailto:amsmith@ucsc.edu) · [UCSC Directory](https://campusdirectory.ucsc.edu/cd_detail?uid=amsmith)
