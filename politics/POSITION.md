@@ -1,97 +1,147 @@
 # Position: Infrastructure Is Pedagogy
 
-## The argument
+## The thesis
 
 The system prompt is the pedagogical frame. The tool bindings are the capability
-boundary. The access model is the enrollment policy. These are not metaphors. When
-a vendor sets the system prompt, a vendor sets the pedagogical frame. When
+boundary. The access model is the enrollment policy. These are not metaphors.
+When a vendor sets the system prompt, a vendor sets the pedagogical frame. When
 procurement selects the model, procurement selects the epistemology. When IT
 controls tool access, IT controls who learns with what.
 
-Every AI deployment in a course is a pedagogical decision. The question is whether
-that decision is made by the teacher or by someone else.
+Every AI deployment in a course is a pedagogical decision. The question is
+whether that decision is made by the instructor or by someone else.
 
-## What procurement gets wrong
+## What the vendors are selling
 
-Enterprise AI procurement optimizes for institutional legibility: one vendor, one
-contract, one dashboard, one compliance narrative. This is rational from the CIO's
-perspective. It is catastrophic from a pedagogical one.
+Three products define the emerging market for AI in higher education:
 
-**Procurement removes the teacher from the design loop.** A Gemini for Education
-deployment gives every course the same model with the same defaults. The teacher
-cannot write a system prompt. The teacher cannot choose which tools the model has.
-The teacher cannot decide that *this* course's AI should be able to search the web
-but not access Drive, or that *that* course's AI should refuse to generate code.
-The design decisions that shape every student interaction are made by product
-managers at Google, not by the person who designed the syllabus.
+- [ChatGPT Edu](https://chatgpt.com/business/education/) (OpenAI)
+- [Claude for Education](https://claude.com/solutions/education) (Anthropic)
+- [Gemini for Education](https://edu.google.com/intl/ALL_us/ai/gemini-for-education/) (Google)
 
-**Procurement creates vendor dependency disguised as infrastructure.** Once Canvas
-integrations, SSO, and workflows are built around a vendor's product, switching is
-not a technical decision — it's a political crisis. The vendor knows this. The
-contract is structured around it. The 5-year renewal is the goal, not the product.
+Visit those pages. Notice who they are talking to. Every testimonial is from a
+CIO or superintendent. Every call to action is "Contact sales." The buyer is the
+administrator. The instructor appears nowhere in the transaction.
 
-**Procurement is slow.** The typical timeline from "we should have an AI tool" to
-"students can use it in a course" is 6–18 months through formal channels. The
-technology changes faster than the process. By the time a tool is approved, its
-assumptions are stale.
+Notice what "customizable" means. All three products offer some form of
+side-channel customization — custom GPTs, Gems, Projects — where someone can
+create a narrowly-scoped AI character for a specific purpose. But these are
+opt-in extras, not defaults. The default experience is the same whether you sign
+in with your institutional account or your personal one. There is no mechanism
+for the institution to differentiate the AI by role: a student, a faculty
+member, and a staff member all get the same default chatbot, despite the fact
+that SSO claims already encode these distinctions.
 
-## What faculty control looks like
+This is not a minor UX issue. It is a privacy architecture failure. The entire
+data governance argument for enterprise AI rests on people using their
+institutional account for institutional work. But when the product is
+indistinguishable from the consumer version — same interface, same personality,
+same capabilities — people forget which account they are signed into, or stop
+caring. The contract says use your campus identity. The product gives you no
+reason to. Every institution already struggles to get people to use campus email
+for campus business, respecting FERPA and other obligations. The reinforcement
+mechanism is making campus services *recognizably and functionally different* —
+not just branded with the correct logo in the corner, but different in character,
+in knowledge, in what they can do. The vendor products do not support this.
 
-A faculty-controlled AI tool has these properties:
+Notice the privacy framing. All three present data governance as a compliance
+checklist — FERPA, COPPA, FedRAMP — not as an architectural decision. None of
+them commit to zero data retention on the inference path as a baseline. Privacy
+is a contract term, not a design principle.
 
-1. The teacher writes the system prompt for their course's model. This is the act
-   of articulating pedagogical intent in machine-readable form. It is intellectual
-   work, not configuration.
+Notice the integration story. Every product goes deeper into its own ecosystem:
+Workspace, Canvas connectors, proprietary plugins. The path in is easy. The path
+out is not discussed.
 
-2. The teacher selects which tools (web search, code execution, document access)
-   the model can use. Each tool binding is a decision about what the AI should be
-   able to do in the context of this course.
+## The baseline
 
-3. The student can read the system prompt and see the tool selection. Transparency
-   is not optional. A student who cannot inspect the AI's instructions is in the
-   same position as a student who cannot read the syllabus.
+Before evaluating any AI tool for instruction, institutions should establish what
+adequate looks like. Four criteria:
 
-4. The model provider can be changed without disrupting the teacher's configuration
-   or the student's experience. The pedagogical layer (prompt, tools, access) is
-   decoupled from the inference layer (which company's GPU runs the model).
+1. **The institution and its instructors control the system prompt.** The
+   institution sets role-differentiated defaults — students, faculty, and staff
+   get AI personalities shaped for their context, not the vendor's generic
+   chatbot. Within that, the instructor writes the system prompt for their
+   course's model. This is the act of articulating pedagogical intent in
+   machine-readable form. It is intellectual work, not configuration. A tool
+   that does not support this layered authorship has removed both the
+   institution and the instructor from the design of the experience.
 
-5. No conversation data is retained by any third-party provider. Students are not
-   the training data.
+2. **The student can read the system prompt.** A student who cannot inspect the
+   AI's instructions is in the same position as a student who cannot read the
+   syllabus. Transparency is not a feature. It is a prerequisite for informed
+   participation.
 
-## The "any faculty member could build this" test
+3. **Zero data retention on inference.** No student message content is stored by
+   any third-party model provider. This is not a negotiable contract term. It is
+   a minimum standard for putting students in conversation with a commercial AI
+   system.
 
-The design principle is Illich's test for convivial tools: can the user understand,
-modify, and replace it? BayLeaf's architecture is designed so that any faculty
-member with basic technical literacy could, in principle, stand up an equivalent
-system for their institution using open-source components and commodity cloud
-services.
+4. **The model provider is switchable.** The pedagogical layer — prompt, tools,
+   access — is decoupled from the inference layer. If the vendor raises prices,
+   degrades quality, or changes terms, the institution can switch providers
+   without rebuilding the system. In a competitive market of pay-per-token
+   providers, this is an architectural choice, not a fantasy.
 
-This is not yet fully true operationally — the current deployment depends on one
-person's credentials and institutional access. Closing this gap is an active
-priority. But the architecture is honest: there is no proprietary component, no
-vendor SDK, no licensed dependency. The barrier to replication is documentation
-and operational knowledge, not intellectual property.
+These criteria are not ambitious. They are minimal. Any tool that fails them is
+asking faculty and students to accept less than they should.
 
-## The dual power reading
+Are these the final and most important criteria? No. This is a living document,
+and further collective experience operating AI in educational settings will
+likely clarify the need for additional baseline criteria.
 
-BayLeaf operates alongside institutional procurement, not against it. It uses
-existing institutional primitives — Canvas, SSO, Google Workspace — to build a
-governance model that procurement would never produce but that institutions can
-absorb. The architecture is designed so that if the institution decides to adopt
-BayLeaf formally, the admin can take over with no migration. And if the institution
-decides to shut it down, the admin can do that too. All authority flows through
-systems the institution already controls.
+## What the vendors fail
 
-This is not revolution. It is a demonstration that the alternative exists, is
-operational, and is cheaper than what procurement would buy.
+Test the three products against the baseline:
 
-## The ask
+| Criterion | ChatGPT Edu | Claude for Education | Gemini for Education |
+|---|---|---|---|
+| Institution/instructor controls system prompt | No. Optional side-channel "custom GPTs." No role-differentiated defaults. | No. Organization admin configures. No per-course instructor authorship. | No. Optional side-channel "Gems." No role-differentiated defaults. |
+| Student can read system prompt | No. | No. | No. |
+| Zero data retention on inference | Contract-dependent. | Contract-dependent. | No. Standard data processing terms apply. |
+| Model provider is switchable | No. Locked to OpenAI. | No. Locked to Anthropic. | No. Locked to Google. |
 
-We are not asking institutions to adopt BayLeaf. We are asking them to adopt
-the *baseline*: transparency, faculty control, zero data retention,
-vendor-switchable architecture, institutional identity. Then evaluate every tool —
-including BayLeaf, including Gemini, including Claude — against that baseline.
+Four criteria. Four failures across the board, as of March 2026, based on
+publicly available product documentation.
 
-The tools that meet it will be the ones that treat faculty as professionals and
-students as people. The ones that don't will be the ones optimized for vendor
+## What BayLeaf demonstrates
+
+BayLeaf is a faculty-operated AI service at UC Santa Cruz. It meets all four
+baseline criteria. This is not because it is a superior product. It is because
+the criteria are easy to meet when the architecture is not optimized for vendor
 lock-in.
+
+- The default AI personality differs by role — students, faculty, and staff get
+  context-appropriate assistants out of the box. Instructors write per-course
+  system prompts by editing a Canvas page; BayLeaf syncs them to the model. The
+  student can read the prompt.
+- All inference routes through zero-data-retention providers. The provider has
+  been swapped multiple times with zero user disruption.
+- The entire system is open source, runs on commodity cloud services, and has no
+  proprietary dependency.
+
+BayLeaf was built by a single faculty member using generative AI in agentic
+coding tools. It has been running since Fall 2024 with multiple course models
+across departments. The total vendor commitment is month-to-month, pay-per-token.
+
+The point is not that every university should run BayLeaf. The point is that a
+faculty member built a campus AI service that meets standards the enterprise
+products do not — and we expect to operate it at scale for less than the cost of
+the single FTE it would take to be the AI vendor liaison.
+
+## The standard
+
+We are not asking institutions to adopt BayLeaf. We are asking them to hold
+every tool — including BayLeaf, including ChatGPT, including Claude, including
+Gemini — to the baseline.
+
+The tools that meet it will be the ones that treat instructors as designers of
+learning experiences and students as participants with a right to understand the
+systems they interact with.
+
+The tools that fail it will be the ones where a product manager at a vendor
+decides what your course's AI does, and neither you nor your students can see
+the instructions it was given.
+
+That is the current state of every major enterprise AI product marketed to
+universities. It does not have to be.
