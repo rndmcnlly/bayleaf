@@ -60,6 +60,8 @@ const KeyCard: FC<{ hasKey: boolean }> = ({ hasKey }) => {
 
 const LlmCard: FC<{ orKey: OpenRouterKey; recommendedModel: string }> = ({ orKey, recommendedModel }) => {
   const remaining = orKey.limit_remaining?.toFixed(4) ?? 'N/A';
+  const limitDisplay = orKey.limit != null ? `$${orKey.limit.toFixed(2)}` : 'unlimited';
+
   return (
     <div class={cardStyle}>
       <h3>LLM Inference</h3>
@@ -78,6 +80,9 @@ const LlmCard: FC<{ orKey: OpenRouterKey; recommendedModel: string }> = ({ orKey
           <div class={statLabelStyle}>This Month</div>
         </div>
       </div>
+      <p style="margin-top: 0.5rem; font-size: 0.85em; color: #666;">
+        Daily limit: {limitDisplay} — resets <span id="resetHint">at midnight UTC</span>.
+      </p>
       <details style="margin-top: 1rem;">
         <summary style="cursor: pointer; color: #006aad; font-weight: 500;">Quick start</summary>
         <div style="margin-top: 0.75rem;">
@@ -258,6 +263,20 @@ const DashboardScripts: FC<{ bayleafToken: string }> = ({ bayleafToken }) => (
           alert('Failed to delete sandbox');
         }
       }
+
+      // On page load: localize the reset hint
+      (function() {
+        const el = document.getElementById('resetHint');
+        if (!el) return;
+        try {
+          const now = new Date();
+          const midnightUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
+          const h = Math.ceil((midnightUtc.getTime() - now.getTime()) / 3600000);
+          const localTime = midnightUtc.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+          const countdown = h === 1 ? 'in ~1 hour' : 'in ~' + h + ' hours';
+          el.textContent = 'at ' + localTime + ' your time (' + countdown + ')';
+        } catch(e) {}
+      })();
 
       // On page load: show key display
       (function() {
