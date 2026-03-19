@@ -131,9 +131,13 @@ system prompt (~14K chars) covering prototyping philosophy, HTML artifact
 generation, CDN library usage, publishing via gisthost, and cost-consciousness.
 Uses `reasoning_effort: low`.
 
-**Procurement** — UC procurement policy assistant. System prompt has a short
-behavioral preamble plus ~670K chars of inlined UC policy documents (11 PDFs).
-The policy context is split out to `context.md` in this backup.
+**Procurement** — UC procurement policy assistant. System prompt contains a
+behavioral preamble and a lookup table of file IDs for 11 UC policy documents.
+Retrieval is agentic: the model calls `read_document` via the `whole_document_retrieval`
+toolkit to fetch full document text on demand, rather than having policy text inlined.
+Documents live in the "Procurement" knowledge base (`8c7d7e27-6871-4871-a6b3-c197cf418072`).
+`context.md` in this backup is the original source used to populate the KB; it is no
+longer part of the system prompt.
 
 ---
 
@@ -156,6 +160,7 @@ grants).
 | `youtube_toolkit` | YouTube | Stub — tells users to run a local `uv` command to fetch transcripts |
 | `campus_directory_toolkit` | Campus Directory | Scrapes UCSC campus directory with CSRF handling |
 | `datetime_converter_toolkit` | Datetime Converter | ISO date → localized string via pytz |
+| `whole_document_retrieval_toolkit` | Whole Document Retrieval | Agentic KB retrieval — list and read full documents by file ID, bypassing vector/embedding search. Access-controlled via `__user__` and `__model_knowledge__`. |
 
 ### Code Sandbox (Lathe)
 
@@ -298,8 +303,13 @@ To reconstruct BayLeaf Chat from this backup:
 
 3. **Import models** — The model JSON files in `models/` match the OWUI import
    format. Use the admin API `POST /api/v1/models/import` or recreate them
-   manually in the Workspace → Models UI. For procurement, paste the content of
-   `context.md` back into the system prompt after the behavioral preamble.
+   manually in the Workspace → Models UI. For procurement, the system prompt is
+   complete as-is in `model.json`; re-populate the KB from `context.md` (see step 3a).
+
+   3a. **Repopulate Procurement KB** — Split `models/procurement/context.md` into
+   individual policy files and upload each to a new knowledge base, then attach it to
+   the model and update the file IDs in the system prompt table. The
+   `whole_document_retrieval` toolkit must also be deployed (see step 4).
 
 4. **Import tools** — For each tool in `tools/`, create a new tool in the admin
    UI (Workspace → Tools), paste the source from `tool.py`, and configure the
@@ -433,9 +443,11 @@ chat/
 │   ├── datetime_converter_toolkit/
 │   │   ├── tool.py
 │   │   └── meta.json
-│   └── mark_time_toolkit/
-│       ├── tool.py
-│       └── meta.json
+│   ├── mark_time_toolkit/
+│   │   ├── tool.py
+│   │   └── meta.json
+│   └── whole_document_retrieval_toolkit/
+│       └── tool.py
 └── functions/
     ├── rate_limit_filter/
     │   ├── function.py
