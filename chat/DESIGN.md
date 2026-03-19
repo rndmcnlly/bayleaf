@@ -23,7 +23,7 @@ sufficient to reconstruct the service from scratch.
 | **App name** | `bayleaf-chat-owui-app` |
 | **App ID** | `7d0addd4-85db-4fe3-b931-501ae88d7f7f` |
 | **Region** | `sfo` |
-| **Image** | `ghcr.io/open-webui/open-webui:v0.8.8` |
+| **Image** | `ghcr.io/open-webui/open-webui:v0.8.10` |
 | **Instance** | `apps-s-1vcpu-2gb` (1 instance) |
 | **HTTP port** | `8080` |
 
@@ -75,10 +75,7 @@ All env vars are set with scope `RUN_AND_BUILD_TIME` unless noted.
 | `S3_REGION_NAME` | `sfo2` | |
 | `S3_ACCESS_KEY_ID` | `<REDACTED>` | |
 | `S3_SECRET_ACCESS_KEY` | `<REDACTED>` | |
-
-Notable absence: `WEBUI_URL` is **not** currently set (defaults to
-`http://localhost:3000`). This should be set to the canonical URL for OAuth
-callbacks to work reliably.
+| `WEBUI_URL` | `https://chat.bayleaf.dev` | Canonical URL for OAuth callbacks |
 
 ### OpenRouter Connection
 
