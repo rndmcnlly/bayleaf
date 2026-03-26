@@ -2,7 +2,8 @@
 # DO NOT commit .dev.vars to version control!
 
 OPENROUTER_PROVISIONING_KEY=sk-or-v1-your-provisioning-key-here
-OIDC_CLIENT_ID=your-google-oauth-client-id.apps.googleusercontent.com
-OIDC_CLIENT_SECRET=GOCSPX-your-client-secret-here
+# OIDC credentials from your provider (CILogon, Google, etc.)
+OIDC_CLIENT_ID=your-oidc-client-id
+OIDC_CLIENT_SECRET=your-oidc-client-secret
 CAMPUS_POOL_KEY=sk-or-v1-your-campus-pool-key-here
 DAYTONA_API_KEY=dtn_your-daytona-api-key-here

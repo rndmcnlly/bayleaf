@@ -37,7 +37,19 @@
     
     // Campus Pass: allow on-campus users to access without personal API keys
     "RECOMMENDED_MODEL": "z-ai/glm-5",
-    
+
+    // OIDC authentication — provider-agnostic via .well-known discovery.
+    // Currently configured for CILogon (https://www.cilogon.org/oidc).
+    // For Google, use:
+    //   OIDC_ISSUER: "https://accounts.google.com"
+    //   OIDC_SCOPES: "openid email profile"
+    //   OIDC_AUTHORIZE_PARAMS: "hd=ucsc.edu"
+    //   OIDC_LOGIN_BUTTON_TEXT: "Sign in with UCSC Google"
+    "OIDC_ISSUER": "https://cilogon.org",
+    "OIDC_SCOPES": "openid email profile org.cilogon.userinfo",
+    "OIDC_AUTHORIZE_PARAMS": "idphint=urn:mace:incommon:ucsc.edu",
+    "OIDC_LOGIN_BUTTON_TEXT": "Sign in with UCSC",
+
     // Campus Pass: allow on-campus users to access without personal API keys
     // Set CAMPUS_IP_RANGES to enable (empty string = disabled)
     "CAMPUS_IP_RANGES": "128.114.0.0/16,169.233.0.0/16,192.35.220.0/24,192.35.223.0/24,2607:F5F0::/32,127.0.0.1/32,::1/128",
@@ -51,8 +63,8 @@
 
   // Secrets to configure via `wrangler secret put`:
   // - OPENROUTER_PROVISIONING_KEY
-  // - OIDC_CLIENT_ID  
-  // - OIDC_CLIENT_SECRET
+  // - OIDC_CLIENT_ID       (from your OIDC provider: CILogon, Google, etc.)
+  // - OIDC_CLIENT_SECRET   (from your OIDC provider)
   // - CAMPUS_POOL_KEY (for Campus Pass feature)
   // - DAYTONA_API_KEY (for sandbox provider)
 }

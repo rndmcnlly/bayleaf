@@ -1,6 +1,6 @@
 # BayLeaf API
 
-Cloudflare Worker built with **Hono** + **@hono/zod-openapi**: OIDC auth (UCSC Google), OpenRouter key provisioning, LLM proxy with system prompt injection, sandboxed code execution (Daytona), Campus Pass (IP-based auth).
+Cloudflare Worker built with **Hono** + **@hono/zod-openapi**: OIDC auth (provider-agnostic via .well-known discovery; currently CILogon), OpenRouter key provisioning, LLM proxy with system prompt injection, sandboxed code execution (Daytona), Campus Pass (IP-based auth).
 
 **Architecture**: Multi-file TypeScript under `src/`, D1 for key mappings + cached sandbox IDs. Zod schemas are the single source of truth for request/response validation and OpenAPI spec generation. Bundled by Wrangler.
 
@@ -19,7 +19,7 @@ src/
   index.ts              Entry point: OpenAPIHono app, cors, route mounting, .doc31() spec, error handler
   types.ts              Bindings, Session, OpenRouterKey, UserKeyRow, AppEnv (Hono generics)
   schemas.ts            Zod schemas — single source of truth for validation + OpenAPI spec
-  constants.ts          GOOGLE_OIDC, OPENROUTER_API, DAYTONA defaults, cookie config
+  constants.ts          OIDC discovery helper, OPENROUTER_API, DAYTONA defaults, cookie config
   openrouter.ts         OpenRouter API helpers (findKeyByName, createKey, deleteKey)
   daytona.ts            Daytona sandbox API client (lifecycle, exec, file ops)
   utils/

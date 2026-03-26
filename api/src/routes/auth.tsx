@@ -1,14 +1,18 @@
 /**
  * Authentication Route Handlers
  *
- * Google OIDC sign-in, callback, and logout.
+ * Provider-agnostic OIDC sign-in, callback, and logout.
+ * Endpoints are discovered from OIDC_ISSUER via .well-known/openid-configuration.
+ * Extra authorize parameters (e.g. idphint for CILogon, hd for Google) are
+ * injected from the OIDC_AUTHORIZE_PARAMS env var.
+ *
  * These are browser-facing HTML routes, not API endpoints — hidden from OpenAPI docs.
  */
 
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { getCookie, setCookie } from 'hono/cookie';
 import type { AppEnv } from '../types';
-import { GOOGLE_OIDC } from '../constants';
+import { discoverOIDC } from '../constants';
 import { setSessionCookie, clearSessionCookie } from '../utils/session';
 import { ErrorPage } from '../templates/layout';
 
@@ -17,17 +21,26 @@ export const authRoutes = new OpenAPIHono<AppEnv>();
 /**
  * GET /login - Start OIDC flow
  */
-authRoutes.get('/login', (c) => {
+authRoutes.get('/login', async (c) => {
   const url = new URL(c.req.url);
   const state = crypto.randomUUID();
 
-  const authUrl = new URL(GOOGLE_OIDC.authorizationEndpoint);
+  const oidc = await discoverOIDC(c.env.OIDC_ISSUER);
+
+  const authUrl = new URL(oidc.authorization_endpoint);
   authUrl.searchParams.set('client_id', c.env.OIDC_CLIENT_ID);
   authUrl.searchParams.set('redirect_uri', `${url.origin}/callback`);
   authUrl.searchParams.set('response_type', 'code');
-  authUrl.searchParams.set('scope', 'openid email profile');
+  authUrl.searchParams.set('scope', c.env.OIDC_SCOPES);
   authUrl.searchParams.set('state', state);
-  authUrl.searchParams.set('hd', c.env.ALLOWED_EMAIL_DOMAIN);
+
+  // Append provider-specific params (e.g. "idphint=urn:mace:incommon:ucsc.edu" or "hd=ucsc.edu")
+  if (c.env.OIDC_AUTHORIZE_PARAMS) {
+    const extra = new URLSearchParams(c.env.OIDC_AUTHORIZE_PARAMS);
+    for (const [key, value] of extra) {
+      authUrl.searchParams.set(key, value);
+    }
+  }
 
   setCookie(c, 'oauth_state', state, { path: '/', httpOnly: true, sameSite: 'Lax', maxAge: 600 });
   return c.redirect(authUrl.toString(), 302);
@@ -42,7 +55,7 @@ authRoutes.get('/callback', async (c) => {
   const error = c.req.query('error');
 
   if (error) {
-    return c.html(<ErrorPage title="Login Failed" message={`Google returned an error: ${error}`} />, 400);
+    return c.html(<ErrorPage title="Login Failed" message={`Identity provider returned an error: ${error}`} />, 400);
   }
 
   if (!code || !state) {
@@ -54,9 +67,11 @@ authRoutes.get('/callback', async (c) => {
     return c.html(<ErrorPage title="Login Failed" message="Invalid state parameter. Please try again." />, 400);
   }
 
+  const oidc = await discoverOIDC(c.env.OIDC_ISSUER);
+
   // Exchange code for tokens
   const origin = new URL(c.req.url).origin;
-  const tokenResponse = await fetch(GOOGLE_OIDC.tokenEndpoint, {
+  const tokenResponse = await fetch(oidc.token_endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
@@ -77,7 +92,7 @@ authRoutes.get('/callback', async (c) => {
   const tokens = await tokenResponse.json() as { access_token: string };
 
   // Get user info
-  const userResponse = await fetch(GOOGLE_OIDC.userinfoEndpoint, {
+  const userResponse = await fetch(oidc.userinfo_endpoint, {
     headers: { 'Authorization': `Bearer ${tokens.access_token}` },
   });
 

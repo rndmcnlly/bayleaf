@@ -2,7 +2,7 @@
  * BayLeaf API Server
  *
  * A Cloudflare Worker that provides:
- * 1. OIDC authentication with UCSC Google accounts
+ * 1. OIDC authentication (provider-agnostic: CILogon, Google, etc.)
  * 2. OpenRouter API key provisioning for authenticated users
  * 3. LLM inference proxy with campus-specific system prompt injection
  * 4. Sandboxed code execution (Daytona)

@@ -320,7 +320,9 @@ export const DashboardPage: FC<{
   recommendedModel: string;
   sandboxInfo?: SandboxInfo | null;
 }> = ({ session, row, orKey, recommendedModel, sandboxInfo }) => {
-  const greeting = `Welcome, ${session.name || session.email}`;
+  const greeting = session.name
+    ? `Welcome, ${session.name} (${session.email})`
+    : `Welcome, ${session.email}`;
   const hasKey = !!(row && orKey);
 
   return (

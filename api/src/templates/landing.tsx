@@ -11,15 +11,16 @@ import {
   btnStyle,
 } from './layout';
 
-export const LandingPage: FC<{ showCampusPass: boolean; recommendedModel: string }> = ({
+export const LandingPage: FC<{ showCampusPass: boolean; recommendedModel: string; loginButtonText: string }> = ({
   showCampusPass,
   recommendedModel,
+  loginButtonText,
 }) => (
   <BaseLayout title="Welcome">
     <div class={cardStyle}>
       <h2>API Access for UCSC</h2>
       <p>Free LLM inference for UC Santa Cruz students, faculty, and staff.</p>
-      <p><a href="/login" class={btnStyle}>Sign in with UCSC Google</a></p>
+      <p><a href="/login" class={btnStyle}>{loginButtonText}</a></p>
     </div>
 
     {showCampusPass ? (

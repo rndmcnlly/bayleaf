@@ -14,6 +14,12 @@ export interface Bindings {
   ALLOWED_EMAIL_DOMAIN: string;
   SYSTEM_PROMPT_PREFIX: string;
   RECOMMENDED_MODEL: string;       // Model slug shown in dashboard examples
+
+  // OIDC configuration (provider-agnostic: works with CILogon, Google, etc.)
+  OIDC_ISSUER: string;             // e.g. "https://cilogon.org" or "https://accounts.google.com"
+  OIDC_SCOPES: string;             // e.g. "openid email profile org.cilogon.userinfo"
+  OIDC_AUTHORIZE_PARAMS: string;   // Extra query params for /authorize (e.g. "idphint=urn:mace:incommon:ucsc.edu")
+  OIDC_LOGIN_BUTTON_TEXT: string;  // e.g. "Sign in with UCSC"
   
   // Campus Pass configuration
   CAMPUS_IP_RANGES: string;        // Comma-separated CIDR ranges (e.g., "128.114.0.0/16,169.233.0.0/16")

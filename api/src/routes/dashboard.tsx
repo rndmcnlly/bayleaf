@@ -18,7 +18,7 @@ export const dashboardRoutes = new OpenAPIHono<AppEnv>();
 dashboardRoutes.get('/', async (c) => {
   const session = await getSession(c);
   if (session) return c.redirect('/dashboard');
-  return c.html(<LandingPage showCampusPass={isCampusPassEligible(c.req.raw, c.env)} recommendedModel={c.env.RECOMMENDED_MODEL} />);
+  return c.html(<LandingPage showCampusPass={isCampusPassEligible(c.req.raw, c.env)} recommendedModel={c.env.RECOMMENDED_MODEL} loginButtonText={c.env.OIDC_LOGIN_BUTTON_TEXT} />);
 });
 
 /** GET /dashboard - Main user interface */

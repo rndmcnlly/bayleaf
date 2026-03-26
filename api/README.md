@@ -4,7 +4,7 @@ API key provisioning, LLM inference proxy, and sandboxed code execution for UC S
 
 ## Features
 
-- **OIDC Authentication**: Sign in with UCSC Google accounts
+- **OIDC Authentication**: Provider-agnostic sign-in (CILogon, Google, or any OIDC provider)
 - **API Key Provisioning**: Automatic key management (one key per user, authenticates all services)
 - **Inference Proxy**: OpenAI-compatible Chat Completions and Responses API endpoints with campus-specific system prompt injection
 - **Code Sandbox**: Persistent Linux sandbox per user for code execution, file upload/download — backed by Daytona
@@ -15,7 +15,7 @@ API key provisioning, LLM inference proxy, and sandboxed code execution for UC S
 
 This is a Cloudflare Worker (Hono) with a D1 database:
 
-1. Authenticates users via Google OIDC (restricted to `@ucsc.edu`)
+1. Authenticates users via OIDC (endpoints discovered from `OIDC_ISSUER`, restricted to `@ucsc.edu` by default)
 2. Uses the OpenRouter Provisioning API to manage per-user LLM API keys
 3. Proxies `/v1/*` requests to OpenRouter, injecting a configurable system prompt prefix
 4. Proxies `/sandbox/*` requests to Daytona for sandboxed code execution and file operations
@@ -41,7 +41,7 @@ user_keys
 
 - [Cloudflare account](https://dash.cloudflare.com/sign-up)
 - [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/)
-- Google Cloud project with OAuth 2.0 credentials
+- OIDC provider credentials (CILogon, Google, or any compliant provider)
 - OpenRouter account with Provisioning API key
 - Daytona account with API key
 
@@ -83,12 +83,14 @@ user_keys
    }
    ```
 
-### Google OAuth Setup
+### OIDC Provider Setup
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create OAuth 2.0 credentials (Web application)
-3. Add authorized redirect URI: `https://api.bayleaf.dev/callback`
-4. Set the OIDC client ID and secret as Cloudflare secrets
+Register your deployment's callback URL (`https://your-domain/callback`) with your OIDC provider:
+
+- **CILogon**: Register at https://cilogon.org/oauth2/register — request the `org.cilogon.userinfo` scope for affiliation data
+- **Google**: Create OAuth 2.0 credentials in the [Google Cloud Console](https://console.cloud.google.com/)
+
+Then configure `OIDC_ISSUER` and related vars in `wrangler.jsonc`, and set `OIDC_CLIENT_ID` / `OIDC_CLIENT_SECRET` as secrets.
 
 ### Environment Variables
 
@@ -98,6 +100,10 @@ user_keys
 | `SPENDING_LIMIT_RESET` | Limit reset period | `daily` |
 | `KEY_NAME_TEMPLATE` | Template for key names (`$email` replaced) | `BayLeaf API for $email` |
 | `ALLOWED_EMAIL_DOMAIN` | Restrict to this email domain | `ucsc.edu` |
+| `OIDC_ISSUER` | OIDC provider issuer URL (endpoints discovered via .well-known) | `https://cilogon.org` |
+| `OIDC_SCOPES` | Space-separated OIDC scopes | `openid email profile org.cilogon.userinfo` |
+| `OIDC_AUTHORIZE_PARAMS` | Extra query params for authorize URL | `idphint=urn:mace:incommon:ucsc.edu` |
+| `OIDC_LOGIN_BUTTON_TEXT` | Login button label | `Sign in with UCSC` |
 | `SYSTEM_PROMPT_PREFIX` | Prefix injected into all chat requests | `You are an AI assistant...` |
 | `CAMPUS_IP_RANGES` | CIDR ranges for Campus Pass (comma-separated, empty = disabled) | `128.114.0.0/16,169.233.0.0/16` |
 | `CAMPUS_SYSTEM_PREFIX` | Additional system prompt prefix for Campus Pass users | `Note: This user is using shared access...` |
@@ -110,8 +116,8 @@ user_keys
 | Secret | Description |
 |--------|-------------|
 | `OPENROUTER_PROVISIONING_KEY` | OpenRouter provisioning API key |
-| `OIDC_CLIENT_ID` | Google OAuth client ID |
-| `OIDC_CLIENT_SECRET` | Google OAuth client secret |
+| `OIDC_CLIENT_ID` | OIDC provider client ID |
+| `OIDC_CLIENT_SECRET` | OIDC provider client secret |
 | `CAMPUS_POOL_KEY` | Shared OpenRouter key for Campus Pass |
 | `DAYTONA_API_KEY` | Sandbox provider API key |
 
