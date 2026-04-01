@@ -20,8 +20,13 @@ does not guarantee.
 | BayLeaf API (`api.bayleaf.dev`) | Cloudflare Workers | OpenRouter-proxying API with key provisioning and sandbox execution |
 | About site (`bayleaf.dev`) | GitHub Pages | Static informational page |
 
-All LLM inference routes through **OpenRouter**, restricted to **zero-data-retention
-(ZDR)** provider endpoints. No model provider retains prompt or completion content.
+LLM inference routes through two configured backends: **OpenRouter** (commercial
+gateway, restricted to **zero-data-retention (ZDR)** provider endpoints) and
+**NRP/SDSC** (NSF-funded institutional inference via [Envoy AI Gateway](https://aigateway.envoyproxy.io/)
+on the [National Research Platform](https://nrp.ai/documentation/userdocs/ai/llm-managed/)).
+OpenRouter handles traffic by default; NRP is a configured alternative serving
+open-weight models on public research infrastructure. No model provider on either
+path retains prompt or completion content.
 
 ---
 
@@ -96,7 +101,8 @@ upstream provider.
 |---|---|---|---|
 | DigitalOcean | Chat hosting, PostgreSQL, S3 | US | User accounts, conversation histories, file uploads |
 | Cloudflare | DNS, CDN, Workers, D1 | US (edge) | All traffic transits Cloudflare; D1 holds API key mappings |
-| OpenRouter | LLM routing | US | Prompts and completions in transit (ZDR — not retained) |
+| OpenRouter | LLM gateway (default) | US | Prompts and completions in transit (ZDR — not retained) |
+| NRP / SDSC | LLM inference (institutional) | US (UC San Diego / NSF) | Prompts and completions in transit on research infrastructure; open-weight models via Envoy AI Gateway |
 | CILogon / InCommon | Identity (OIDC) | US (Internet2) | Email, name, affiliation claim |
 | Daytona | Code sandboxes | Provider-managed | Per-user sandbox file contents |
 | Tavily | Web search tool | US | Search queries from tool-use |
@@ -153,13 +159,17 @@ the repository.
 
 1. **Proxy indirection.** Users never hold raw provider keys. BayLeaf tokens are
    an opaque layer enabling revocation and spending control.
-2. **System prompt enforcement.** A BayLeaf system prompt prefix is prepended to all
+2. **Multi-backend inference.** ✨ Two inference backends are configured: OpenRouter
+   (commercial, ZDR) and NRP/SDSC (institutional, NSF-funded). Traffic can shift
+   between them without user-facing changes. This is dual-sourcing, not redundancy
+   — the backends have different political profiles and cost structures.
+3. **System prompt enforcement.** A BayLeaf system prompt prefix is prepended to all
    API-proxied requests. Users cannot suppress it.
-3. **Provider-agnostic OIDC.** Authentication discovers endpoints from
+4. **Provider-agnostic OIDC.** Authentication discovers endpoints from
    `.well-known/openid-configuration`. Identity provider switches are configuration
    changes, not code changes.
-4. **Screen-sharing safety.** API keys are never displayed in plaintext.
-5. **Single-administrator model.** One operator has administrative access to all
+5. **Screen-sharing safety.** API keys are never displayed in plaintext.
+6. **Single-administrator model.** One operator has administrative access to all
    components. No shared admin accounts.
 
 ---
@@ -182,8 +192,9 @@ the repository.
 - **HIPAA.** The service is not designed for protected health information and no
   BAA is in place with any provider.
 - **Dependency on commercial providers.** OpenRouter, DigitalOcean, and Cloudflare
-  are commercially funded companies with their own data access capabilities. See the
-  [dependency audit](DEPENDENCIES.md) for a full analysis.
+  are commercially funded companies with their own data access capabilities. NRP/SDSC
+  is NSF-funded public infrastructure but is not under BayLeaf's operational control.
+  See the [dependency audit](DEPENDENCIES.md) for a full analysis.
 - **No second deployment.** The claim that "any faculty member could build this" is
   architectural, not empirically verified. No independent replication exists.
 

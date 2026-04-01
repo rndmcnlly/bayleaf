@@ -81,7 +81,9 @@ adequate looks like. Four criteria:
    access — is decoupled from the inference layer. If the vendor raises prices,
    degrades quality, or changes terms, the institution can switch providers
    without rebuilding the system. In a competitive market of pay-per-token
-   providers, this is an architectural choice, not a fantasy.
+   providers — and alongside NSF-funded institutional inference from the
+   [National Research Platform](https://nrp.ai/documentation/userdocs/ai/llm-managed/) —
+   this is an architectural choice, not a fantasy.
 
 These criteria are not ambitious. They are minimal. Any tool that fails them is
 asking faculty and students to accept less than they should.
@@ -116,7 +118,12 @@ lock-in.
   system prompts by editing a Canvas page; BayLeaf syncs them to the model. The
   student can read the prompt.
 - All inference routes through zero-data-retention providers. The provider has
-  been swapped multiple times with zero user disruption.
+  been swapped multiple times with zero user disruption. As of March 2026,
+  BayLeaf runs two configured inference backends in parallel: OpenRouter
+  (commercial gateway to ZDR providers) and NRP/SDSC (NSF-funded institutional
+  inference serving open-weight models via [Envoy AI Gateway](https://aigateway.envoyproxy.io/)).
+  The switchability criterion is not hypothetical — it is the current operating
+  state.
 - The entire system is open source, runs on commodity cloud services, and has no
   proprietary dependency.
 
