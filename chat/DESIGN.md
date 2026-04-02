@@ -23,7 +23,7 @@ sufficient to reconstruct the service from scratch.
 | **App name** | `bayleaf-chat-owui-app` |
 | **App ID** | `7d0addd4-85db-4fe3-b931-501ae88d7f7f` |
 | **Region** | `sfo` |
-| **Image** | `ghcr.io/open-webui/open-webui:v0.8.11` |
+| **Image** | `ghcr.io/open-webui/open-webui` (version pinned in app spec) |
 | **Instance** | `apps-s-1vcpu-2gb` (1 instance) |
 | **HTTP port** | `8080` |
 
@@ -60,6 +60,8 @@ All env vars are set with scope `RUN_AND_BUILD_TIME` unless noted.
 | `ENABLE_OAUTH_SIGNUP` | `true` | Users sign up via CILogon |
 | `ENABLE_LOGIN_FORM` | `false` | No password login |
 | `OAUTH_MERGE_ACCOUNTS_BY_EMAIL` | `true` | Merge accounts across auth migrations |
+| `OAUTH_UPDATE_NAME_ON_LOGIN` | `true` | Overwrite display name from OIDC claim on each login |
+| `OAUTH_UPDATE_PICTURE_ON_LOGIN` | `true` | Overwrite avatar from OIDC claim on each login (no-op for CILogon which sends no picture) |
 | `OPENID_PROVIDER_URL` | `https://cilogon.org/.well-known/openid-configuration` | CILogon OIDC |
 | `OAUTH_PROVIDER_NAME` | `UCSC` | Login button label |
 | `OAUTH_SCOPES` | `openid email profile org.cilogon.userinfo` | Includes affiliation claim |
@@ -73,7 +75,7 @@ All env vars are set with scope `RUN_AND_BUILD_TIME` unless noted.
 | `ENABLE_OAUTH_GROUP_CREATION` | `true` | Auto-create groups from claims |
 | `OAUTH_GROUPS_CLAIM` | `affiliation` | CILogon eduPerson affiliation |
 | `OAUTH_GROUPS_SEPARATOR` | `;` | CILogon uses semicolons |
-| `OAUTH_BLOCKED_GROUPS` | `["legacy:*"]` | Protect manually-managed groups; see §1a |
+| `OAUTH_BLOCKED_GROUPS` | `["legacy:*","course:*"]` | Protect manually-managed groups; see §1a |
 | `ENABLE_EVALUATION_ARENA_MODELS` | `false` | |
 | `ENABLE_MESSAGE_RATING` | `false` | |
 | `ENABLE_COMMUNITY_SHARING` | `false` | |
@@ -126,12 +128,12 @@ exact matches, shell-style wildcards (`*`, `?`), and regex patterns.
 | Prefix | Purpose | Examples |
 |--------|---------|---------|
 | `legacy:` | Pre-existing manually-managed groups | `legacy:amsmith-group`, `legacy:https://canvas.ucsc.edu/courses/89028` |
-| `course:` | Per-course access (future) | `course:CMPM 146 S26` |
+| `course:` | Per-course access; suffix is Canvas course ID | `course:92591` |
 | `access:` | Special access tiers (future) | `access:beta-testers`, `access:elevated-rate` |
 | `admin:` | Operational groups (future) | `admin:operators` |
 | *(no prefix, `@ucsc.edu` suffix)* | OAuth-managed affiliation | `Faculty@ucsc.edu`, `Student@ucsc.edu`, `Member@ucsc.edu` |
 
-The current blocked pattern is `["legacy:*"]`. As new prefixes are introduced,
+The current blocked pattern is `["legacy:*", "course:*"]`. As new prefixes are introduced,
 add them: `["legacy:*", "course:*", "access:*", "admin:*"]`.
 
 **Key details:**
@@ -148,6 +150,53 @@ add them: `["legacy:*", "course:*", "access:*", "admin:*"]`.
   value that doesn't match any existing group, OWUI auto-creates it. This means
   new affiliation groups (e.g. `Affiliate@ucsc.edu`) appear automatically.
 
+### 1b. Pre-Provisioning Students via Placeholder Accounts
+
+Students can't be granted access to a course-specific model (e.g. Brace) until
+they have OWUI accounts — but most students haven't logged in yet at the start of
+term. The solution is to create **placeholder accounts** before term begins, add
+them to the course group, and let the OIDC merge mechanism handle the rest when
+students first log in.
+
+**How it works:**
+
+1. Pull the Canvas roster: `canvaslms users -c COURSE_ID -s -e`
+2. For each student email, create a placeholder:
+   `owui.py users add <email> <name>` (exits 2 if already exists — safe to re-run)
+3. Look up the user ID and add to the course group:
+   `owui.py groups add-user <group-id> <user-id>`
+4. Student logs in via CILogon for the first time → OWUI finds the placeholder
+   by email (`OAUTH_MERGE_ACCOUNTS_BY_EMAIL=true`), stamps the OIDC `sub` onto
+   it, and updates the display name from the OIDC claim
+   (`OAUTH_UPDATE_NAME_ON_LOGIN=true`). The account is now permanently linked.
+5. The course model (e.g. `brace3-92591`) is already in the group — Brace just
+   appears in the student's model list with no action required from them.
+
+**Tooling:** See `scripts/owui.py` (`users add`, `users find`, `users show`,
+`groups add-user`) and `canvaslms` for roster export. A provisioning script for
+a given course should pull the roster programmatically rather than transcribing
+emails by hand to avoid transcription errors.
+
+**TAs and guests:** Add non-student enrollments (TAs, guests) the same way —
+`canvaslms users -c COURSE_ID -a -e` lists TAs. Add them to the group manually
+if not on the Canvas roster.
+
+**Re-running is safe:** `owui.py users add` exits with code 2 if the account
+already exists (either a prior placeholder or a student who logged in early).
+`owui.py groups add-user` is idempotent for existing members. A provisioning
+script can be re-run mid-term to catch late adds from the registrar.
+
+**Caveats:**
+- Placeholder passwords are set to the string `placeholder-no-login`. Direct
+  password login is disabled (`ENABLE_LOGIN_FORM=false`) so this is never
+  usable, but it is not a real secret.
+- `OAUTH_UPDATE_EMAIL_ON_LOGIN` is intentionally **not** set. If CILogon were
+  ever to assert a different email than the placeholder (e.g. a preferred email
+  alias), leaving this off prevents the stored email from drifting and breaking
+  future lookups.
+- CILogon does not send a `picture` claim, so `OAUTH_UPDATE_PICTURE_ON_LOGIN`
+  is a no-op in practice but is set for correctness if the IdP ever changes.
+
 ---
 
 ## 2. Workspace Models
@@ -160,14 +209,15 @@ is defined in `models/<id>/model.json`.
 
 | ID | Name | Base Model | Description |
 |----|------|-----------|-------------|
-| `basic` | Basic | `openrouter.z-ai/glm-5` | Default model for all users. Campus-aware system prompt, suggestion prompts, no tools bound by default. |
+| `basic` | Basic | `openrouter.z-ai/glm-5` | Default model for all users. Campus-aware system prompt (`Basic v1.1`), six suggestion prompts, no tools bound by default. System prompt mentions BayLeaf API access at `api.bayleaf.dev`. |
 | `help` | Help | `openrouter.z-ai/glm-5` | BayLeaf help desk. Answers questions about the service, processes invite codes via `accept_invites_toolkit`. |
 
 ### Group-Restricted Models
 
 | ID | Name | Base Model | Group(s) |
 |----|------|-----------|----------|
-| `brace-85291` | Brace (CMPM 121 Fall 2025) | `openrouter.deepseek/deepseek-v3.2` | Course-specific |
+| `brace-85291` | Brace (CMPM 121 Fall 2025) | `openrouter.deepseek/deepseek-v3.2` | Course-specific (Brace v2) |
+| `brace3-92591` | Brace (CMPM 120 Spring 2026) | `openrouter.deepseek/deepseek-v3.2` | Course-specific |
 | `everett-program` | Everett Program Chat | `openrouter.z-ai/glm-5` | Program-specific |
 | `gambit` | Gambit (GLM-5) | `openrouter.z-ai/glm-5` | 2 groups |
 | `procurement` | Procurement | `openrouter.z-ai/glm-5` | Staff group |
@@ -186,10 +236,21 @@ Bound to `accept_invites_toolkit` so it can process invite codes. System prompt
 (`Help v1.1`) describes BayLeaf facts and firmly redirects non-help tasks to
 Basic.
 
-**Brace** — Course assistant for CMPM 121. No static system prompt — instead,
-`brace_filter` dynamically fetches the system prompt from a Canvas wiki page at
-runtime. Bound to `brace_submit_action` (Canvas submission button) and
-`brace_filter`. Uses `brace_toolkit` (force-injected by the filter).
+**Brace (v2, `brace-85291`)** — Course assistant for CMPM 121 Fall 2025. No
+static system prompt — `brace_filter` fetches the system prompt from a Canvas
+wiki page at the hardcoded slug `braces-system-prompt` at runtime. Bound to
+`brace_submit_action` (Canvas submission button) and `brace_filter`. Uses
+`brace_toolkit` (force-injected by the filter). Falls back to a generic prompt
+if the Canvas page is unreachable. (The original Brace v1 architecture lives at
+[rndmcnlly/brace](https://github.com/rndmcnlly/brace).)
+
+**Brace (v3, `brace3-92591`)** — Course assistant for CMPM 120 Spring 2026.
+Successor to Brace v2 with a cleaner design. No `brace_submit_action`. Uses
+`brace3_filter` + `brace3_canvas_toolkit` (see §3). Key differences from v2:
+system prompt is looked up by **page title** ("Brace3 System Prompt") rather
+than a hardcoded slug — raises cleanly if the page is missing instead of
+falling back silently; body is converted from HTML to markdown via
+`markdownify`. Vision and `file_context` enabled.
 
 **Gambit** — Rapid game prototyping assistant (`Gambit v1.5`). Extremely detailed
 system prompt (~14K chars) covering prototyping philosophy, HTML artifact
@@ -280,7 +341,8 @@ variables like `{"GITHUB_TOKEN":"ghp_..."}`) that are injected into every
 | ID | Name | Access | Description |
 |----|------|--------|-------------|
 | `gws_toolkit` | Google Workspace | Admin only (no grants) | Per-user OAuth2 access to Google Drive (see below) |
-| `brace_toolkit` | Brace's toolkit | Admin only (no grants) | Canvas API, GitHub API, Google Drive (valve: multiple keys) |
+| `brace_toolkit` | Brace's toolkit | Admin only (no grants) | Canvas API, GitHub API, Google Drive used by Brace v2 (valve: multiple keys) |
+| `brace3_canvas_toolkit` | Brace3 Canvas Toolkit | Admin only (no grants) | Canvas LMS read access + date localization for Brace v3. Not activated by users — force-injected by `brace3_filter`. Token is snarfed from the filter at call time; no separate valve needed. Allowlist-based URL validation; results filtered with `jq`. |
 | `mark_time_toolkit` | Mark Time | Admin only (no grants) | Stopwatch/timer with per-chat LRU cache (user valve: timezone) |
 
 ### Google Workspace (GWS Toolkit)
@@ -323,6 +385,7 @@ These are **never** committed to this repo:
 - `jina_reader_toolkit` — `JINA_API_KEY`
 - `deepinfra_key_generator_toolkit` — `API_KEY`, `API_TOKEN_NAME`, `MODELS`, `EXPIRES_DELTA`
 - `brace_toolkit` — `GITHUB_API_TOKEN`, `CANVAS_ACCESS_TOKEN`, `GOOGLE_DRIVE_SERVICE_ACCOUNT_KEY_JSON`
+- `brace3_filter` — `CANVAS_ACCESS_TOKEN` (used by both `brace3_filter` and `brace3_canvas_toolkit`; the toolkit snarfs it from the filter instance)
 
 ---
 
@@ -335,8 +398,9 @@ pipeline. Each is in `functions/<id>/` with `function.py` and `meta.json`.
 |----|------|--------|--------|-------------|
 | `rate_limit_filter` | filter | yes | **yes** | Per-user rate limiting (10/min, 50/hr, 100/3hr sliding window) |
 | `depth_limit_filter` | filter | yes | no | Halves max response tokens with each turn (disabled) |
-| `brace_submit_action` | action | no | yes | Button to submit conversation HTML to Canvas assignment |
-| `brace_filter` | filter | no | yes | Injects Brace's toolkit and fetches system prompt from Canvas wiki |
+| `brace_submit_action` | action | no | yes | Button to submit conversation HTML to Canvas assignment (Brace v2 only) |
+| `brace_filter` | filter | no | yes | Injects `brace_toolkit` and fetches system prompt from Canvas wiki page at hardcoded slug (Brace v2) |
+| `brace3_filter` | filter | no | yes | Injects `brace3_canvas_toolkit` and fetches system prompt from Canvas page by title "Brace3 System Prompt" (Brace v3). Derives course ID from model ID (`brace3-NNN`). Raises on missing page. Valve: `CANVAS_ACCESS_TOKEN`. |
 
 ### Rate Limit Filter
 
@@ -355,7 +419,41 @@ shorter in long conversations.
 
 ---
 
-## 5. Recovery Procedure
+## 5. Skills
+
+Skills are markdown documents surfaced to the LLM as context (Workspace →
+Skills). Access is controlled by `access_grants` — the same mechanism as
+models and tools. BayLeaf uses skills to inject role-specific behavioral
+guidance and platform feature hints, scoped to the OAuth groups that
+correspond to each campus affiliation.
+
+Manage via `owui.py skills` or the admin API at `/api/v1/skills/`.
+
+| ID | Active | Access | Description |
+|----|--------|--------|-------------|
+| `web-search` | yes | all users (`user:*`) | Describes the Tavily web search and Jina Reader integrations and how to enable them. |
+| `code-sandbox` | yes | 1 group | Points to the Lathe coding agent toolkit and Daytona sandboxes; tells users to enable the Code Sandbox toolkit. |
+| `canvas-api` | yes | 1 group | Guides agents using the Canvas LMS API via the Code Sandbox toolkit's `CANVAS_ACCESS_TOKEN` env var; includes `canvaslms` CLI usage, REST API pointer, data hygiene rules, and escalation to a desktop agent for complex tasks. |
+| `bayleaf-for-students` | yes | 1 group (`Student@ucsc.edu`) | Instructs the agent to prioritize learning, build writing literacy, and points to the learning-opportunities skill package. |
+| `bayleaf-for-employees` | yes | 1 group (`Employee@ucsc.edu`) | Placeholder — acknowledges employee role, no special instructions yet. |
+| `bayleaf-for-faculty` | yes | 0 grants (owner-only) | Suggests AI integration paths for research and teaching; mentions Canvas LMS and BayLeaf as a campus-scoped alternative to commercial tools. |
+
+### Role-scoped skills and OAuth groups
+
+The `bayleaf-for-*` skills implement a lightweight skill system: each skill is
+granted `read` access to the OAuth-managed group that corresponds to the
+relevant `eduPerson` affiliation (e.g. `Student@ucsc.edu`,
+`Employee@ucsc.edu`). When a user with that affiliation opens a conversation,
+the OWUI skill engine surfaces the matching skill(s) as additional context for
+the model. This gives the model role-aware behavioral guidance without
+requiring separate models per role.
+
+`bayleaf-for-faculty` currently has no grants (owner-only) — it is visible
+only to admins while its content is being refined.
+
+---
+
+## 6. Recovery Procedure
 
 To reconstruct BayLeaf Chat from this backup:
 
@@ -380,9 +478,18 @@ To reconstruct BayLeaf Chat from this backup:
    UI (Workspace → Tools), paste the source from `tool.py`, and configure the
    access grants and valves per `meta.json`.
 
+   Note: `brace3_canvas_toolkit` has no `meta.json` — it is admin-only with no
+   grants. Its Canvas token comes from the `brace3_filter` valve at runtime;
+   no valve configuration is needed on the toolkit itself.
+
 5. **Import functions** — Same process via Workspace → Functions. Set
    `is_global` and `is_active` flags per `meta.json`. Configure function
    valves (Canvas tokens etc.) in the admin panel.
+
+   For `brace3_filter`: set `CANVAS_ACCESS_TOKEN` in the filter's valve. This
+   same token is used by `brace3_canvas_toolkit` at call time (snarfed via
+   `app.state.FUNCTIONS`). Attach to any model with ID matching `brace3-NNN`
+   where `NNN` is the Canvas course ID.
 
 6. **Configure model bindings** — Attach tools, filters, and actions to models
    per the `toolIds`, `filterIds`, and `actionIds` in each `model.json`.
@@ -392,7 +499,7 @@ To reconstruct BayLeaf Chat from this backup:
 
 ---
 
-## 6. Synchronization Workflow
+## 7. Synchronization Workflow
 
 This directory is the source of truth for model system prompts, tool source
 code, and function source code. Changes flow in two directions:
@@ -449,7 +556,7 @@ These are on the `main` branch and may change between OWUI releases.
 
 ---
 
-## 7. Directory Structure
+## 8. Directory Structure
 
 ```
 chat/
@@ -462,9 +569,11 @@ chat/
 │   ├── help/
 │   │   ├── model.json
 │   │   └── profile.png
-│   ├── brace-85291/
+│   ├── brace-85291/        # Brace v2 — CMPM 121 Fall 2025
 │   │   ├── model.json
 │   │   └── profile.png
+│   ├── brace3-92591/       # Brace v3 — CMPM 120 Spring 2026
+│   │   └── model.json
 │   ├── everett-program/
 │   │   └── model.json
 │   ├── gambit/
@@ -496,9 +605,11 @@ chat/
 │   ├── gws_toolkit/
 │   │   ├── tool.py          # Google Workspace — per-user OAuth2 Drive access
 │   │   └── meta.json
-│   ├── brace_toolkit/
+│   ├── brace_toolkit/       # Brace v2 — Canvas + GitHub + Drive
 │   │   ├── tool.py
 │   │   └── meta.json
+│   ├── brace3_canvas_toolkit/  # Brace v3 — Canvas read-only, force-injected by brace3_filter
+│   │   └── tool.py          # No meta.json — admin-only, no grants
 │   ├── youtube_toolkit/
 │   │   ├── tool.py
 │   │   └── meta.json
@@ -512,7 +623,7 @@ chat/
 │   │   ├── tool.py
 │   │   └── meta.json
 │   └── whole_document_retrieval_toolkit/
-│       └── tool.py
+│       └── tool.py          # No meta.json
 └── functions/
     ├── rate_limit_filter/
     │   ├── function.py
@@ -520,10 +631,12 @@ chat/
     ├── depth_limit_filter/
     │   ├── function.py
     │   └── meta.json
-    ├── brace_submit_action/
+    ├── brace_submit_action/ # Brace v2 only
     │   ├── function.py
     │   └── meta.json
-    └── brace_filter/
-        ├── function.py
-        └── meta.json
+    ├── brace_filter/        # Brace v2 — hardcoded slug, fallback on error
+    │   ├── function.py
+    │   └── meta.json
+    └── brace3_filter/       # Brace v3 — title lookup, markdownify, raises on missing page
+        └── function.py      # No meta.json
 ```

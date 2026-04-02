@@ -1,0 +1,51 @@
+{
+  "id": "brace3-92591",
+  "base_model_id": "openrouter.deepseek/deepseek-v3.2",
+  "name": "Brace (CMPM 120 Spring 2026)",
+  "params": {
+    "function_calling": "native"
+  },
+  "meta": {
+    "profile_image_url": "/static/favicon.png",
+    "description": null,
+    "capabilities": {
+      "file_context": true,
+      "vision": true,
+      "file_upload": true,
+      "web_search": false,
+      "image_generation": false,
+      "code_interpreter": false,
+      "citations": true,
+      "status_updates": true,
+      "usage": true,
+      "builtin_tools": true
+    },
+    "tags": [],
+    "actionIds": [],
+    "filterIds": [
+      "brace3_filter"
+    ],
+    "suggestion_prompts": null,
+    "builtinTools": {
+      "time": false,
+      "memory": false,
+      "chats": false,
+      "notes": false,
+      "knowledge": false,
+      "channels": false,
+      "web_search": false,
+      "image_generation": false,
+      "code_interpreter": false
+    }
+  },
+  "access_grants": [
+    {
+      "resource_type": "model",
+      "resource_id": "brace3-92591",
+      "principal_type": "group",
+      "principal_id": "1eaa6c24-72ef-4242-a473-3105fb126ab5",
+      "permission": "read"
+    }
+  ],
+  "is_active": true
+}
