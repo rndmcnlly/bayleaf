@@ -186,6 +186,77 @@ const SandboxCard: FC<{ sandboxInfo: SandboxInfo | null }> = ({ sandboxInfo }) =
   );
 };
 
+const GwsCard: FC = () => (
+  <div class={cardStyle} style="background: #f0f7f0; border-color: #2d7d46;">
+    <h3>Google Workspace CLI</h3>
+    <p>
+      Access Drive, Gmail, Calendar, Sheets, and other Google Workspace services from your
+      terminal or coding agent, authenticated as your UCSC account.
+    </p>
+    <details style="margin-top: 1rem;">
+      <summary style="cursor: pointer; color: #006aad; font-weight: 500;">Setup instructions</summary>
+      <div style="margin-top: 0.75rem;">
+        <p><strong>1. Install:</strong></p>
+        <pre><code>npm install -g @googleworkspace/cli</code></pre>
+        <p style="margin-top: 0.75rem;"><strong>2. Download credentials:</strong></p>
+        <pre><code>{`curl -s https://api.bayleaf.dev/docs/gws-client-secret.json \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -o ~/.config/gws/client_secret.json`}</code></pre>
+        <p style="margin-top: 0.75rem;"><strong>3. Authenticate (one-time, opens browser):</strong></p>
+        <pre><code>gws auth login --account your@ucsc.edu --full</code></pre>
+        <p style="margin-top: 0.75rem; font-size: 0.9em; color: #666;">
+          Or hand the full setup guide to your coding agent (GWS setup is included):
+        </p>
+        <p style="margin: 0.25rem 0 0 0;">
+          <a href="/docs/SKILL.md" target="_blank" style="font-weight: 500;">
+            https://api.bayleaf.dev/docs/SKILL.md
+          </a>
+        </p>
+      </div>
+    </details>
+  </div>
+);
+
+const CanvasCard: FC = () => (
+  <div class={cardStyle} style="background: #fff7f0; border-color: #c45a20;">
+    <h3>Canvas LMS</h3>
+    <p>
+      Give your coding agent access to your Canvas courses, assignments, grades, and announcements
+      via the <code>canvaslms</code> CLI.
+    </p>
+    <details style="margin-top: 1rem;">
+      <summary style="cursor: pointer; color: #006aad; font-weight: 500;">Setup instructions</summary>
+      <div style="margin-top: 0.75rem;">
+        <p><strong>1. Generate a Canvas access token:</strong></p>
+        <p style="font-size: 0.9em; color: #666;">
+          Go to <a href="https://canvas.ucsc.edu/profile/settings" target="_blank">Canvas &rarr; Profile &rarr; Settings</a>,
+          scroll to "Approved Integrations", and click <strong>New Access Token</strong>.
+          Copy the token (it is only shown once). This is separate from your BayLeaf API key.
+        </p>
+        <p style="margin-top: 0.75rem;"><strong>2. Install the CLI:</strong></p>
+        <pre><code>{`pipx install canvaslms
+pipx inject canvaslms cryptography`}</code></pre>
+        <p style="margin-top: 0.75rem;"><strong>3. Log in (interactive, stores credentials):</strong></p>
+        <pre><code>canvaslms login</code></pre>
+        <p style="font-size: 0.9em; color: #666; margin-top: 0.5rem;">
+          Enter <code>canvas.ucsc.edu</code> as the hostname and paste your token.
+          Credentials are stored in your system keyring (or a config file as fallback).
+        </p>
+        <p style="margin-top: 0.75rem;"><strong>4. Verify:</strong></p>
+        <pre><code>canvaslms courses -i</code></pre>
+        <p style="margin-top: 0.75rem; font-size: 0.9em; color: #666;">
+          Or hand the full details to your coding agent (Canvas setup is included):
+        </p>
+        <p style="margin: 0.25rem 0 0 0;">
+          <a href="/docs/SKILL.md" target="_blank" style="font-weight: 500;">
+            https://api.bayleaf.dev/docs/SKILL.md
+          </a>
+        </p>
+      </div>
+    </details>
+  </div>
+);
+
 // ── Dashboard Scripts ────────────────────────────────────────────
 
 const DashboardScripts: FC<{ bayleafToken: string }> = ({ bayleafToken }) => (
@@ -319,7 +390,8 @@ export const DashboardPage: FC<{
   orKey: OpenRouterKey | null;
   recommendedModel: string;
   sandboxInfo?: SandboxInfo | null;
-}> = ({ session, row, orKey, recommendedModel, sandboxInfo }) => {
+  gwsEnabled?: boolean;
+}> = ({ session, row, orKey, recommendedModel, sandboxInfo, gwsEnabled }) => {
   const greeting = session.name
     ? `Welcome, ${session.name} (${session.email})`
     : `Welcome, ${session.email}`;
@@ -336,6 +408,10 @@ export const DashboardPage: FC<{
       {hasKey && <SandboxCard sandboxInfo={sandboxInfo ?? null} />}
 
       <CodingAgentCard recommendedModel={recommendedModel} />
+
+      {gwsEnabled && <GwsCard />}
+
+      <CanvasCard />
 
       <DashboardScripts bayleafToken={row?.bayleaf_token || ''} />
     </BaseLayout>

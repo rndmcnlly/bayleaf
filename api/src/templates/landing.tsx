@@ -6,7 +6,6 @@ import type { FC } from 'hono/jsx';
 import {
   BaseLayout,
   RecommendedModelHint,
-  CodingAgentCard,
   cardStyle,
   btnStyle,
 } from './layout';
@@ -41,7 +40,5 @@ export const LandingPage: FC<{ showCampusPass: boolean; recommendedModel: string
         </p>
       </div>
     )}
-
-    <CodingAgentCard recommendedModel={recommendedModel} />
   </BaseLayout>
 );

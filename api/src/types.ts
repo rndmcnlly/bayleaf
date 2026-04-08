@@ -36,6 +36,11 @@ export interface Bindings {
   OIDC_CLIENT_SECRET: string;
   CAMPUS_POOL_KEY: string;         // Shared OpenRouter key for campus access
   DAYTONA_API_KEY: string;         // Sandbox provider API key
+
+  // Google Workspace CLI (gws) — optional; enables /docs/gws-* endpoints
+  GWS_CLIENT_ID: string;           // OAuth client ID from GCP project (Desktop app)
+  GWS_CLIENT_SECRET: string;       // OAuth client secret from GCP project
+  GWS_PROJECT_ID: string;          // GCP project ID (e.g. "gws-cli-playground-ucsc")
 }
 
 export interface Session {

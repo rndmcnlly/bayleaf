@@ -67,4 +67,7 @@
   // - OIDC_CLIENT_SECRET   (from your OIDC provider)
   // - CAMPUS_POOL_KEY (for Campus Pass feature)
   // - DAYTONA_API_KEY (for sandbox provider)
+  // - GWS_CLIENT_ID        (Google Workspace CLI OAuth client ID)
+  // - GWS_CLIENT_SECRET    (Google Workspace CLI OAuth client secret)
+  // - GWS_PROJECT_ID       (GCP project ID, e.g. "gws-cli-playground-ucsc")
 }

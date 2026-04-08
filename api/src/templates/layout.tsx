@@ -219,6 +219,10 @@ export const CodingAgentCard: FC<{ recommendedModel: string }> = ({ recommendedM
     <h3>Use the BayLeaf API in a coding agent</h3>
     <p>
       AI coding agents run in your terminal and can read, edit, and execute code on your behalf.
+      (If you aren't ready for work in the command line, you can access coding agent features
+      in <a href="https://chat.bayleaf.dev/">BayLeaf Chat</a> by enabling the <em>Code Sandbox</em> feature
+      in a new chat. It is like a more powerful version of
+      ChatGPT's <a href="https://help.openai.com/en/articles/8437071-data-analysis-with-chatgpt" target="_blank">code execution environment</a>.)
       BayLeaf works with several open-source options, a free alternative to commercial tools
       like <a href="https://claude.ai/code" target="_blank">Claude Code</a> or{' '}
       <a href="https://github.com/openai/codex" target="_blank">Codex CLI</a>.

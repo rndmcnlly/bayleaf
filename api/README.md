@@ -9,6 +9,7 @@ API key provisioning, LLM inference proxy, and sandboxed code execution for UC S
 - **Inference Proxy**: OpenAI-compatible Chat Completions and Responses API endpoints with campus-specific system prompt injection
 - **Code Sandbox**: Persistent Linux sandbox per user for code execution, file upload/download — backed by Daytona
 - **Self-Service Dashboard**: Create, view, and revoke API keys; see LLM usage stats and sandbox status
+- **Tool Integrations**: Distributes setup instructions and credentials for Google Workspace CLI and Canvas LMS CLI
 - **Campus Pass**: On-campus users can access inference and ephemeral sandboxes without authentication
 
 ## Architecture
@@ -67,6 +68,10 @@ user_keys
    wrangler secret put OIDC_CLIENT_SECRET
    wrangler secret put CAMPUS_POOL_KEY
    wrangler secret put DAYTONA_API_KEY
+   # Optional: enable Google Workspace CLI credential distribution
+   wrangler secret put GWS_CLIENT_ID
+   wrangler secret put GWS_CLIENT_SECRET
+   wrangler secret put GWS_PROJECT_ID
    ```
 
 4. Update `wrangler.jsonc` with your configuration (non-secret values)
@@ -120,6 +125,9 @@ Then configure `OIDC_ISSUER` and related vars in `wrangler.jsonc`, and set `OIDC
 | `OIDC_CLIENT_SECRET` | OIDC provider client secret |
 | `CAMPUS_POOL_KEY` | Shared OpenRouter key for Campus Pass |
 | `DAYTONA_API_KEY` | Sandbox provider API key |
+| `GWS_CLIENT_ID` | Google Workspace CLI OAuth client ID (optional, enables GWS distribution) |
+| `GWS_CLIENT_SECRET` | Google Workspace CLI OAuth client secret |
+| `GWS_PROJECT_ID` | GCP project ID for the OAuth client |
 
 ## Campus Pass
 
@@ -199,6 +207,18 @@ Off-campus users will receive a 401 error directing them to get a personal key a
 Keyed users get a persistent sandbox (auto-stops after 15 min idle, auto-archives after 60 min stopped, recreated transparently on next request). Campus Pass users get ephemeral sandboxes that are deleted after each execution.
 
 Default working directory is `/home/daytona/workspace`. No output truncation.
+
+### Documentation & Tool Integrations
+
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/docs` | GET | Public | Interactive API docs (Scalar viewer) |
+| `/docs/openapi.json` | GET | Public | OpenAPI 3.1 spec |
+| `/docs/SKILL.md` | GET | Authenticated or campus | Agent skill file (LLM, sandbox, coding agent setup, GWS, Canvas) |
+| `/docs/gws-client-secret.json` | GET | Authenticated or campus | Google Workspace CLI OAuth client config |
+| `/recommended-model` | GET | Public | Current recommended model slug and display name |
+
+The SKILL.md endpoint serves a dynamic Markdown document that coding agents can fetch to self-configure. It includes setup instructions for OpenCode, Goose, and pi, as well as Google Workspace CLI and Canvas LMS CLI integration guides. When GWS env vars are configured, the GWS section includes full onboarding instructions; when they are absent, the section is omitted.
 
 ## License
 

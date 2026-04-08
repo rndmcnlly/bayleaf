@@ -136,6 +136,24 @@
         authenticates both LLM inference and sandbox access.
     </p>
 
+    <h3>Tool Integrations</h3>
+    <p>
+        The API dashboard distributes setup instructions and credentials for CLI tools that
+        extend what coding agents can do on behalf of authenticated users:
+    </p>
+    <ul>
+        <li>
+            <strong>Google Workspace CLI</strong> (<a href="https://github.com/googleworkspace/cli">gws</a>):
+            Access Drive, Gmail, Calendar, Sheets, and Docs. BayLeaf distributes the OAuth client
+            configuration so users don't need their own GCP project.
+        </li>
+        <li>
+            <strong>Canvas LMS CLI</strong> (<a href="https://github.com/dbosk/canvaslms">canvaslms</a>):
+            Manage courses, assignments, grades, and announcements. Users authenticate with their
+            own Canvas access token.
+        </li>
+    </ul>
+
     <h2>GenAI Disclosure</h2>
     <p>
         Nearly 100% of the code, documentation, and other project data in the
