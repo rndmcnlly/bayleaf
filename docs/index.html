@@ -92,6 +92,12 @@
         to everyone and allow some level of autonomy in agentic research processes.
     </p>
     <p>
+        The <strong>Code Sandbox</strong> toolkit gives models access to a persistent, sandboxed Linux
+        environment, making it possible to run command-line tools directly from the browser. This enables
+        tasks like file processing, scripting, and interacting with external services through CLI tools
+        without leaving the chat interface.
+    </p>
+    <p>
         Most chat models are subject to a rate limit mechanism that ensures fair and cost-efficient 
         access for all.
     </p>
@@ -142,10 +148,44 @@
         <a href="mailto:amsmith@ucsc.edu">Adam Smith</a> directly.
     </p>
 
+    <h2>In the News</h2>
+    <ul>
+        <li>
+            <a href="https://cityonahillpress.com/2026/03/10/ucscs-newly-established-ai-council-is-at-a-crossroads/">UCSC's Newly Established AI Council Is at a Crossroads</a>
+            (<em>City on a Hill Press, March 2026.</em>)
+            Student journalism covering UCSC's AI Council and the campus debate over vendor deals vs. faculty-built tools.
+            BayLeaf is cited as an example of the latter approach.
+        </li>
+        <li>
+            <a href="https://news.ucsc.edu/2026/02/secure-ai-tools-now-available-to-staff/">Secure AI Tools Now Available to Staff</a>
+            (<em>UCSC News, February 2026.</em>)
+            Official campus announcement of Google Gemini Chat and NotebookLM for staff, developed in consultation
+            with the AI Council. BayLeaf predates and complements this rollout, offering open-weight models
+            and zero-data-retention inference where the Google tools focus on Google Workspace integration.
+        </li>
+    </ul>
+
+    <h2>Related Projects</h2>
+    <ul>
+        <li>
+            <a href="https://lathe.tools/">Lathe</a>:
+            The open-source toolkit powering the Code Sandbox feature above. Reusable by any Open WebUI
+            deployment. Includes support for tools like
+            <a href="https://github.com/dbosk/canvaslms">canvaslms</a> (a Python/CLI Canvas LMS client)
+            for <em>agentic</em> course management from the browser.
+        </li>
+        <li>
+            <a href="https://github.com/rndmcnlly/gws-toolkit">GWS Toolkit</a>:
+            Deep integration with Google Workspace (Drive, Gmail, Calendar, Sheets, Docs) packaged as a
+            reusable Open WebUI toolkit. Built for BayLeaf Chat; drop-in for any Open WebUI deployment
+            with Google Workspace.
+        </li>
+    </ul>
+
     <h2>Beyond UCSC</h2>
     <p>
-        BayLeaf is open source and designed to be replicable. The architecture —
-        Open WebUI, OpenRouter, OIDC authentication, zero-data-retention inference —
+        BayLeaf is open source and designed to be replicable. The architecture
+        (Open WebUI, OpenRouter, OIDC authentication, zero-data-retention inference)
         is not UCSC-specific. Any institution with SSO and a domain can run the same stack.
     </p>
     <p>
