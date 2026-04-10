@@ -25,6 +25,10 @@ import {
 
 export const proxyRoutes = new OpenAPIHono<AppEnv>();
 
+// ── GET / (mounted as /v1) — bare root returns 200 OK ─────────────
+// Some agent harnesses probe the base_url to test connectivity.
+proxyRoutes.get('/', (c) => c.body(null, 200));
+
 /** Build the system prompt prefix, adding campus suffix when applicable. */
 function buildSystemPrefix(env: AppEnv['Bindings'], isCampusMode: boolean): string {
   let prefix = env.SYSTEM_PROMPT_PREFIX;
