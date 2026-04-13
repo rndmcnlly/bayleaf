@@ -1,3 +1,10 @@
+"""
+title: Accept Invites
+author: Adam Smith
+description: Use invite codes to join groups. Admins can also create invite codes.
+version: 0.2.0
+"""
+
 import re
 import os
 import jwt
@@ -9,7 +16,6 @@ from open_webui.models.groups import Groups
 
 from datetime import datetime, timezone
 
-SESSION_SECRET = WEBUI_SECRET_KEY
 ALGORITHM = "HS256"
 
 from typing import Optional
@@ -46,7 +52,21 @@ def duration_to_seconds(duration: str) -> int:
     return total_seconds
 
 
+class Valves(BaseModel):
+    INVITE_SIGNING_KEY: str = Field(
+        default="",
+        description="Secret key for signing/verifying invite JWTs. If empty, falls back to WEBUI_SECRET_KEY.",
+    )
+
+
 class Tools:
+
+    def __init__(self):
+        self.valves = Valves()
+
+    @property
+    def _signing_key(self) -> str:
+        return self.valves.INVITE_SIGNING_KEY or WEBUI_SECRET_KEY
 
     async def accept_invite(
         self, invite_key: Optional[str] = None, __user__: dict = {}, __event_call__=None
@@ -69,7 +89,7 @@ class Tools:
 
         invite = jwt.decode(
             invite_key.removeprefix("invite-"),
-            SESSION_SECRET,
+            self._signing_key,
             algorithms=[ALGORITHM],
         )
 
@@ -132,5 +152,5 @@ class Tools:
         if restrict_email:
             invite["eml"] = restrict_email
 
-        key = jwt.encode(invite, SESSION_SECRET, ALGORITHM)
+        key = jwt.encode(invite, self._signing_key, ALGORITHM)
         return "invite-" + key
