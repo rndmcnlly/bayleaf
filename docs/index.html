@@ -68,11 +68,35 @@
         providers accessed via <a href="https://openrouter.ai/">OpenRouter</a>.
     </p>
 
-    <h2>Privacy</h2>
+    <h2>Responsible Design</h2>
+    <p>
+        BayLeaf is designed as a form of <strong>harm reduction</strong> with respect to widely
+        acknowledged problems with commercial AI offerings: runaway energy consumption, extractive
+        data practices, and closed ecosystems that concentrate power outside of universities.
+    </p>
     <ul>
-        <li>Your message contents are not logged or stored by any third-party providers</li>
-        <li>The chat interface maintains just one copy of your messages in an encrypted database 
-            that is only accessible by the system administrator</li>
+        <li>
+            <strong>Energy and resource efficiency.</strong> Most models accessible through BayLeaf
+            are a fraction of the size of flagship models from mainstream providers: tens to hundreds
+            of billions of parameters versus trillions. The resources used to train and serve these
+            models scale with size, so by using mid-sized models, we use roughly 90–99% less energy
+            per unit of output.
+        </li>
+        <li>
+            <strong>Giving back to the public web.</strong> BayLeaf Chat is based on
+            <a href="https://artificialanalysis.ai/models/open-source">open-weight models</a>,
+            meaning the underlying LLMs are available for anyone to download from the public web.
+            This echoes the way the data likely used to train these models was originally harvested:
+            reciprocity rather than enclosure.
+        </li>
+        <li>
+            <strong>Your data is never stored outside of BayLeaf.</strong> BayLeaf leverages
+            zero-data-retention (ZDR) inference services so that no LLM provider stores a copy of
+            your data, even temporarily. This differs from typical commercial agreements where the
+            provider promises to delete your data after some retention period (e.g. 30 days). Within
+            BayLeaf itself, the chat interface maintains one copy of your messages in an encrypted
+            database accessible only by the system administrator.
+        </li>
     </ul>
 
     <h2>Chat Service</h2>
