@@ -188,6 +188,7 @@ export const BaseLayout: FC<PropsWithChildren<{ title: string }>> = ({ title, ch
       <header style="display: flex; align-items: baseline; gap: 1rem;">
         <h1 style="margin: 0;">BayLeaf API</h1>
         <a href="/docs" style="font-size: 0.95rem;">API Reference</a>
+        <a href="/docs/SKILL.md" style="font-size: 0.95rem;">Agent Skill</a>
       </header>
       <main>
         {children}
