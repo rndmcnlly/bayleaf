@@ -72,11 +72,12 @@
     <p>
         BayLeaf is designed as a form of <strong>harm reduction</strong> with respect to widely
         acknowledged problems with commercial AI offerings: runaway energy consumption, extractive
-        data practices, and closed ecosystems that concentrate power outside of universities.
+        data practices, closed ecosystems that concentrate power outside of universities, and
+        tools that prioritize engagement over learning and rigor.
     </p>
     <ul>
         <li>
-            <strong>Smaller models, smaller footprint.</strong> AI's growing energy and
+            <strong>Energy: Smaller models, smaller footprints.</strong> AI's growing energy and
             resource footprint is a legitimate concern. The flagship models from mainstream
             providers can have trillions of parameters, and training compute, energy, and cost
             all <a href="https://epoch.ai/data/ai-models?view=graph&tab=notable&xAxis=Parameters">scale
@@ -84,7 +85,7 @@
             of billions of parameters), consuming proportionally less energy and other resources.
         </li>
         <li>
-            <strong>Built on open-weight models.</strong> Large-scale AI is often criticized for
+            <strong>Reciprocity: Built on open-weight models.</strong> Large-scale AI is often criticized for
             concentrating power in a few corporations behind closed APIs. BayLeaf exclusively uses
             <a href="https://huggingface.co/models">open-weight models</a>: models that are
             contributed back to the public web, available for anyone to download, audit, or build
@@ -92,13 +93,34 @@
             technology possible.
         </li>
         <li>
-            <strong>Your data is never stored outside of BayLeaf.</strong> Many commercial AI
+            <strong>Privacy: Your data is never stored outside of BayLeaf.</strong> Many commercial AI
             services retain copies of user conversations, sometimes for 30 days or longer, creating
             exposure that users cannot control. BayLeaf leverages
             <a href="https://openrouter.ai/docs/guides/features/zdr">zero-data-retention (ZDR)</a>
             inference services so that no LLM provider stores a copy of your data. Within BayLeaf
             itself, the chat interface maintains one copy of your messages in an encrypted database
             accessible only by the system administrator.
+        </li>
+        <li>
+            <strong>Pedagogy: Support and resistance, not just answers.</strong> Commercial AI
+            assistants are optimized to be maximally helpful, which in practice means maximally
+            doing-it-for-you: students mistake speed for understanding, and the skills education
+            is supposed to build quietly atrophy. BayLeaf's models use
+            <a href="https://www.changetechnically.fyi/2396236/episodes/18692591-you-can-learn-with-ai">system
+            prompts and agent skills written by educators</a> for their students and peers,
+            designed to scaffold learning rather than shortcut it. Faculty control means the tool
+            can be co-designed with students, not imposed by a product team.
+        </li>
+        <li>
+            <strong>Inquiry: Grounded in sources of truth.</strong> General-purpose chatbots
+            <a href="https://calearninglab.substack.com/p/my-robot-teacher-episode-9-transcript">reward
+            fluent output over rigorous inquiry</a>: they generate plausible answers without
+            grounding them in the user's actual data, documents, or methods, producing false
+            confidence where skepticism is needed. BayLeaf connects models to grounded tools
+            (web search, Google Workspace, code execution) so that AI-assisted inquiry can be
+            anchored in evidence the user can verify. The system itself is counterfoil
+            research: a working experiment in AI infrastructure that doesn't teach dependence on
+            commercial platforms.
         </li>
     </ul>
     <details>
