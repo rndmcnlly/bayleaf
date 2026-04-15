@@ -22,6 +22,7 @@ import { dashboardRoutes } from './routes/dashboard';
 import { keyRoutes } from './routes/key';
 import { proxyRoutes } from './routes/proxy';
 import { sandboxRoutes } from './routes/sandbox';
+import { webRoutes } from './routes/web';
 import { docsRoutes } from './routes/docs';
 import { RecommendedModelResponseSchema } from './schemas';
 
@@ -85,6 +86,7 @@ app.openapi(recommendedModelRoute, async (c) => {
 
 app.route('/v1', proxyRoutes);
 app.route('/sandbox', sandboxRoutes);
+app.route('/web', webRoutes);
 app.route('/docs', docsRoutes);
 app.route('/', authRoutes);
 app.route('/', keyRoutes);
@@ -122,6 +124,7 @@ app.doc31('/docs/openapi.json', (c) => ({
   tags: [
     { name: 'LLM', description: 'OpenAI-compatible inference endpoints (proxied to OpenRouter)' },
     { name: 'Sandbox', description: 'Sandboxed Linux code execution and file I/O' },
+    { name: 'Web', description: 'Web search and page content fetching' },
     { name: 'Key', description: 'API key management (session-authenticated)' },
     { name: 'Meta', description: 'API metadata and documentation' },
   ],

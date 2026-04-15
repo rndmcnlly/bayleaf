@@ -217,6 +217,30 @@ const GwsCard: FC = () => (
   </div>
 );
 
+const WebCard: FC = () => (
+  <div class={cardStyle} style="background: #f0f0ff; border-color: #4a4aad;">
+    <h3>Web Search & Fetch</h3>
+    <p>
+      Search the web and extract page content via the API, powered by Tavily and Jina Reader.
+    </p>
+    <details style="margin-top: 1rem;">
+      <summary style="cursor: pointer; color: #006aad; font-weight: 500;">Quick start</summary>
+      <div style="margin-top: 0.75rem;">
+        <p><strong>Search:</strong></p>
+        <pre><code>{`curl https://api.bayleaf.dev/web/search \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"query": "UC Santa Cruz", "max_results": 5}'`}</code></pre>
+        <p style="margin-top: 0.75rem;"><strong>Fetch page content:</strong></p>
+        <pre><code>{`curl https://api.bayleaf.dev/web/fetch \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"url": "https://example.com", "format": "markdown"}'`}</code></pre>
+      </div>
+    </details>
+  </div>
+);
+
 const CanvasCard: FC = () => (
   <div class={cardStyle} style="background: #fff7f0; border-color: #c45a20;">
     <h3>Canvas LMS</h3>
@@ -406,6 +430,8 @@ export const DashboardPage: FC<{
       {hasKey && orKey && <LlmCard orKey={orKey} recommendedModel={recommendedModel} />}
 
       {hasKey && <SandboxCard sandboxInfo={sandboxInfo ?? null} />}
+
+      {hasKey && <WebCard />}
 
       <CodingAgentCard recommendedModel={recommendedModel} />
 

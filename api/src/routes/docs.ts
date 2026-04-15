@@ -272,6 +272,64 @@ Permanently destroys the sandbox and all its data.
 
 ---
 
+## Web Search & Fetch
+
+BayLeaf provides web search and page content extraction as API endpoints.
+
+### Search the web
+
+${fence}
+POST /web/search
+Content-Type: application/json
+Authorization: Bearer sk-bayleaf-...
+
+{
+  ${bt}query${bt}: ${bt}UC Santa Cruz computational media${bt},
+  ${bt}max_results${bt}: 5
+}
+${fence}
+
+Response:
+
+${fence}json
+{
+  ${bt}results${bt}: [
+    { ${bt}title${bt}: ${bt}...${bt}, ${bt}url${bt}: ${bt}https://...${bt}, ${bt}snippet${bt}: ${bt}...${bt} }
+  ],
+  ${bt}answer${bt}: ${bt}Optional AI-generated summary${bt}
+}
+${fence}
+
+- ${bt}max_results${bt} is optional (default 5, max 20).
+- ${bt}answer${bt} is an optional AI-generated summary of the search results.
+
+### Fetch page content
+
+${fence}
+POST /web/fetch
+Content-Type: application/json
+Authorization: Bearer sk-bayleaf-...
+
+{
+  ${bt}url${bt}: ${bt}https://example.com/article${bt},
+  ${bt}format${bt}: ${bt}markdown${bt}
+}
+${fence}
+
+Response:
+
+${fence}json
+{
+  ${bt}url${bt}: ${bt}https://example.com/article${bt},
+  ${bt}content${bt}: ${bt}# Article Title\\n\\nContent here...${bt}
+}
+${fence}
+
+- ${bt}format${bt} is optional: ${bt}markdown${bt} (default), ${bt}text${bt}, or ${bt}html${bt}.
+- Returns clean, extracted content suitable for LLM consumption.
+
+---
+
 ## Model Recommendation
 
 The recommended model changes over time. Fetch the current recommendation:

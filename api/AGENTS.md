@@ -1,6 +1,6 @@
 # BayLeaf API
 
-Cloudflare Worker built with **Hono** + **@hono/zod-openapi**: OIDC auth (provider-agnostic via .well-known discovery; currently CILogon), OpenRouter key provisioning, LLM proxy with system prompt injection, sandboxed code execution (Daytona), Campus Pass (IP-based auth).
+Cloudflare Worker built with **Hono** + **@hono/zod-openapi**: OIDC auth (provider-agnostic via .well-known discovery; currently CILogon), OpenRouter key provisioning, LLM proxy with system prompt injection, sandboxed code execution (Daytona), web search and page fetching (Tavily/Jina), Campus Pass (IP-based auth).
 
 **Architecture**: Multi-file TypeScript under `src/`, D1 for key mappings + cached sandbox IDs. Zod schemas are the single source of truth for request/response validation and OpenAPI spec generation. Bundled by Wrangler.
 
@@ -22,6 +22,7 @@ src/
   constants.ts          OIDC discovery helper, OPENROUTER_API, DAYTONA defaults, cookie config
   openrouter.ts         OpenRouter API helpers (findKeyByName, createKey, deleteKey)
   daytona.ts            Daytona sandbox API client (lifecycle, exec, file ops)
+  web.ts               Web search (Tavily) and page fetch (Jina Reader) clients
   utils/
     auth.ts             resolveAuth(): shared auth for proxy + sandbox routes (Campus Pass, Bayleaf token, raw key)
     ip.ts               IP range parsing, campus pass checks
@@ -38,6 +39,7 @@ src/
     key.ts              keyRoutes: GET|POST|DELETE /key (OpenAPI-documented)
     proxy.ts            proxyRoutes: POST /responses, POST /chat/completions, /v1/* catch-all
     sandbox.ts          sandboxRoutes: POST /exec, GET|PUT /files/*, DELETE / (OpenAPI-documented)
+    web.ts               webRoutes: POST /search, POST /fetch (OpenAPI-documented)
 ```
 
 ## Code Style
@@ -69,6 +71,8 @@ src/
 /sandbox/exec           POST: bash execution (campus-pass: ephemeral, keyed: persistent)
 /sandbox/files/*        GET: download file, PUT: upload file (keyed only)
 /sandbox                DELETE: destroy user's sandbox (keyed or session)
+/web/search              POST: web search (Tavily)
+/web/fetch               POST: fetch page content (Jina Reader)
 /recommended-model      Current recommended model slug + display name (JSON, unauthenticated)
 /docs                   Interactive API docs (Scalar viewer, loads /docs/openapi.json)
 /docs/openapi.json      OpenAPI 3.1 spec (auto-generated from Zod schemas)

@@ -142,6 +142,44 @@ export const KeyRevokedResponseSchema = z.object({
   success: z.literal(true),
 }).openapi('KeyRevokedResponse');
 
+// ── Web Search & Fetch ───────────────────────────────────────────
+
+export const WebSearchRequestSchema = z.object({
+  query: z.string().min(1).openapi({
+    description: 'Search query string.',
+    example: 'UC Santa Cruz computational media',
+  }),
+  max_results: z.number().int().min(1).max(20).optional().default(5).openapi({
+    description: 'Maximum number of results to return (1–20, default 5).',
+  }),
+}).openapi('WebSearchRequest');
+
+export const WebSearchResultSchema = z.object({
+  title: z.string().openapi({ description: 'Page title.' }),
+  url: z.string().openapi({ description: 'Page URL.' }),
+  snippet: z.string().openapi({ description: 'Relevant snippet from the page.' }),
+}).openapi('WebSearchResult');
+
+export const WebSearchResponseSchema = z.object({
+  results: z.array(WebSearchResultSchema).openapi({ description: 'Search results.' }),
+  answer: z.string().optional().openapi({ description: 'AI-generated summary answer, if available.' }),
+}).openapi('WebSearchResponse');
+
+export const WebFetchRequestSchema = z.object({
+  url: z.string().url().openapi({
+    description: 'URL of the page to fetch.',
+    example: 'https://example.com/article',
+  }),
+  format: z.enum(['markdown', 'text', 'html']).optional().default('markdown').openapi({
+    description: 'Desired response format (default: markdown).',
+  }),
+}).openapi('WebFetchRequest');
+
+export const WebFetchResponseSchema = z.object({
+  url: z.string().openapi({ description: 'The requested URL.' }),
+  content: z.string().openapi({ description: 'Page content in the requested format.' }),
+}).openapi('WebFetchResponse');
+
 // ── Meta ─────────────────────────────────────────────────────────
 
 export const RecommendedModelResponseSchema = z.object({

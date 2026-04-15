@@ -37,6 +37,10 @@ export interface Bindings {
   CAMPUS_POOL_KEY: string;         // Shared OpenRouter key for campus access
   DAYTONA_API_KEY: string;         // Sandbox provider API key
 
+  // Web search and fetch providers
+  TAVILY_API_KEY: string;          // Tavily search API key
+  JINA_API_KEY: string;            // Jina Reader API key
+
   // Google Workspace CLI (gws) — optional; enables /docs/gws-* endpoints
   GWS_CLIENT_ID: string;           // OAuth client ID from GCP project (Desktop app)
   GWS_CLIENT_SECRET: string;       // OAuth client secret from GCP project
