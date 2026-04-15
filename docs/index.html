@@ -63,11 +63,6 @@
         as a living prototype of a possible future university-managed service.
     </p>
 
-    <p>
-        LLM inference for the Playground is based on a portfolio of <strong>zero-data-retention</strong> 
-        providers accessed via <a href="https://openrouter.ai/">OpenRouter</a>.
-    </p>
-
     <h2>Responsible Design</h2>
     <p>
         BayLeaf is designed as a form of <strong>harm reduction</strong> with respect to widely
@@ -141,17 +136,16 @@
     <p>Our Chat service provides three models to all users:</p>
     <ul>
         <li>
-            <strong>Basic</strong> is powered by a strong,
-            <a href="https://artificialanalysis.ai/models/open-source">open-weight</a> LLM
-            (which one varies as better models become available). Its system prompt is written
-            for the campus community, orienting the model as a concise assistant with
-            self-knowledge of BayLeaf and the Chat interface.
+            <strong>Basic</strong> is a general-purpose assistant (which underlying model
+            varies as better ones become available). Its system prompt is written for the
+            campus community, orienting the model as a concise assistant with self-knowledge
+            of BayLeaf and the Chat interface.
         </li>
         <li>
-            <strong>Deep Research</strong> pairs the same open-weight LLM with web search and
-            web page retrieval toolkits, enabling interactive, source-grounded research sessions.
-            It states its intent before each web lookup and summarizes what it finds, so users
-            can follow the research path for themselves.
+            <strong>Deep Research</strong> pairs the same model with web search and web page
+            retrieval toolkits, enabling interactive research sessions. It states its intent
+            before each web lookup and summarizes what it finds, so users can follow the
+            research path for themselves.
         </li>
         <li>
             <strong>Help</strong> is a help desk for BayLeaf itself. It can answer questions
@@ -195,8 +189,8 @@
         are subject to a reasonable total daily spending limit.
     </p>
     <p>
-        For a list of models and per-token prices, visit <a href="https://openrouter.ai/models">https://openrouter.ai/models</a> 
-        (note that only models available from ZDR providers can be accessed via BayLeaf API).
+        For a list of models and per-token prices, visit
+        <a href="https://openrouter.ai/models">OpenRouter's model directory</a>.
     </p>
 
     <h3>Code Sandbox</h3>
@@ -249,8 +243,7 @@
             <a href="https://news.ucsc.edu/2026/02/secure-ai-tools-now-available-to-staff/">Secure AI Tools Now Available to Staff</a>
             (<em>UCSC News, February 2026.</em>)
             Official campus announcement of Google Gemini Chat and NotebookLM for staff, developed in consultation
-            with the AI Council. BayLeaf predates and complements this rollout, offering open-weight models
-            and zero-data-retention inference where the Google tools focus on Google Workspace integration.
+            with the AI Council. BayLeaf predates and complements this rollout.
         </li>
     </ul>
 
@@ -275,10 +268,9 @@
     <p>
         BayLeaf is open source, built in a
         <a href="https://en.wikipedia.org/wiki/Municipalism">municipalist</a> spirit: it serves
-        one campus, not the entire higher education sector. The architecture (Open WebUI,
-        OpenRouter, OIDC authentication, zero-data-retention inference) is not UCSC-specific,
-        but it is intentionally local. It is designed to be copied and remixed to fit the needs
-        of other campuses, not scaled into a platform that governs them.
+        one campus, not the entire higher education sector. The architecture is not
+        UCSC-specific, but it is intentionally local: designed to be copied and remixed to fit
+        the needs of other campuses, not scaled into a platform that governs them.
     </p>
     <p>
         If you're evaluating AI tools for your campus,
