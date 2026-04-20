@@ -367,7 +367,7 @@ variables like `{"GITHUB_TOKEN":"ghp_..."}`) that are injected into every
 
 | ID | Name | Access | Description |
 |----|------|--------|-------------|
-| `gws_toolkit` | Google Workspace | Admin only (no grants) | Per-user OAuth2 access to Google Drive (see below) |
+| `gws_toolkit` | Google Workspace | All users (`user:*`) | Per-user, per-chat OAuth2 access to Google Workspace APIs (see below) |
 | `mark_time_toolkit` | Mark Time | Admin only (no grants) | Stopwatch/timer with per-chat LRU cache (user valve: timezone) |
 
 ### 3a. Stealth Toolkit Pattern
@@ -415,32 +415,85 @@ accidentally enable or disable them via the chat composer's tool picker.
 
 ### Google Workspace (GWS Toolkit)
 
-Per-user OAuth2 integration with Google Drive. Source:
+Per-user, per-chat OAuth2 integration with Google Workspace APIs. Source:
 [rndmcnlly/gws-toolkit](https://github.com/rndmcnlly/gws-toolkit). Users
-connect their own Google account via an in-chat OAuth flow; tokens are stored
-per-user and revocable. Currently **admin-only** — not yet granted to the
-general user population.
+connect their own Google account via an in-chat OAuth flow. Tokens are
+**ephemeral** (in-process memory, no DB persistence) and scoped to a single
+chat; every chat starts unauthorized and users consent to exactly the
+capabilities they need. Available to all users.
 
 **Tools exposed to the model:**
 
 | Tool | Purpose |
 |------|---------|
-| `connect_google_workspace` | Initiate OAuth flow to link the user's Google account |
-| `disconnect_google_workspace` | Revoke tokens and unlink |
-| `search_drive(query)` | Search the user's Google Drive by text query |
-| `list_drive_folder(folder_id)` | List files in a Drive folder (default: root) |
-| `read_drive_file(file_id)` | Read a file — exports Docs as markdown, Sheets as CSV, Slides as text |
+| `gws_authorize(capabilities)` | Request authorization for capabilities in the current chat, or inspect current status |
+| `gws_action(action, params)` | Execute a Google Workspace action, gated by admin capabilities and per-chat authorization |
+
+**Actions** (22 across 4 services, dispatched via `gws_action`):
+
+| Action | Capability | Description |
+|--------|-----------|-------------|
+| `drive.files.search` | `drive.readonly` | Full-text search across Drive |
+| `drive.files.get` | `drive.readonly` | Read a file (exports Docs as markdown, Sheets as CSV, Slides as text) |
+| `drive.files.list` | `drive.readonly` | List folder contents |
+| `gmail.messages.search` | `gmail.readonly` | Search messages using Gmail syntax |
+| `gmail.messages.get` | `gmail.readonly` | Read a message (decodes MIME body) |
+| `gmail.threads.list` | `gmail.readonly` | Search threads |
+| `gmail.threads.get` | `gmail.readonly` | Read all messages in a thread |
+| `gmail.drafts.create` | `gmail.compose` | Create a draft (does NOT send) |
+| `gmail.drafts.list` | `gmail.readonly` | List drafts |
+| `gmail.drafts.get` | `gmail.readonly` | Read a specific draft |
+| `calendar.calendars.list` | `calendar.readonly` | List available calendars |
+| `calendar.events.list` | `calendar.readonly` | List/search events (defaults to upcoming) |
+| `calendar.events.get` | `calendar.readonly` | Full event details |
+| `calendar.freebusy.query` | `calendar.readonly` | Check free/busy status |
+| `calendar.events.create` | `calendar.events` | Create an event |
+| `calendar.events.patch` | `calendar.events` | Update specific fields of an event |
+| `calendar.events.delete` | `calendar.events` | Delete an event |
+| `sheets.spreadsheets.get` | `spreadsheets.readonly` | Spreadsheet metadata |
+| `sheets.values.get` | `spreadsheets.readonly` | Read a cell range |
+| `sheets.values.batchGet` | `spreadsheets.readonly` | Read multiple cell ranges |
+| `sheets.values.update` | `spreadsheets` | Write values to a cell range |
+| `sheets.values.append` | `spreadsheets` | Append rows to a detected table |
 
 **Design.** The toolkit self-registers an OAuth callback route on the OWUI
-FastAPI app at startup. Token refresh is handled transparently. Read-only
-scope only (`drive.readonly`). The OAuth client credentials are configured
-via admin valves — the toolkit itself contains no secrets.
+FastAPI app at startup. Authorization uses OWUI event emitters (`__event_call__`)
+to show a confirmation modal with the OAuth link; the user right-clicks to open
+it in a new tab, completes Google consent, then confirms back in the chat.
+Tokens live in-process keyed by `(user_id, chat_id)` and are lost on server
+restart — this is by design. The `enabled_capabilities` valve sets an admin
+ceiling; users can only authorize up to the admin-allowed maximum. The
+`gws_authorize` response includes current UTC time so the LLM can ground
+time-relative API parameters.
+
+**Capabilities** (mirror Google OAuth scope suffixes):
+
+| Capability | Description |
+|-----------|-------------|
+| `drive.readonly` | Search, read, list Drive files |
+| `drive` | Full Drive access |
+| `gmail.readonly` | Read Gmail messages and drafts |
+| `gmail.compose` | Create and manage email drafts |
+| `calendar.readonly` | View calendar events |
+| `calendar.events` | Create, edit, and delete events |
+| `spreadsheets.readonly` | Read Sheets data |
+| `spreadsheets` | Read and write Sheets |
+| `tasks.readonly` | View Google Tasks |
+| `tasks` | Manage Google Tasks |
+| `documents.readonly` | Read Docs content |
+| `documents` | Read and write Docs |
+| `presentations.readonly` | Read Slides content |
+| `presentations` | Read and write Slides |
+
+Drive, Gmail, Calendar, and Sheets have action handlers. Tasks, Docs, and
+Slides are scope-ready in the capability registry but have no handlers yet.
 
 **Admin valves** (configured in OWUI admin panel, never committed):
 
 - `google_client_id` — Google OAuth client ID
 - `google_client_secret` — Google OAuth client secret
 - `base_url` — OWUI base URL for the OAuth callback (e.g. `https://chat.bayleaf.dev`)
+- `enabled_capabilities` — Comma-separated capability ceiling (default: `drive.readonly`)
 
 ### Tool Valves (credentials configured in admin UI)
 
@@ -448,7 +501,7 @@ Several tools require API keys configured as "valves" in the OWUI admin panel.
 These are **never** committed to this repo:
 
 - `lathe` — `daytona_api_key`, `daytona_api_url`, `daytona_proxy_url`, `deployment_label`, `auto_stop_minutes`, `auto_archive_minutes`, `sandbox_language`
-- `gws_toolkit` — `google_client_id`, `google_client_secret`, `base_url`
+- `gws_toolkit` — `google_client_id`, `google_client_secret`, `base_url`, `enabled_capabilities`
 - `tavily_web_search` — `tavily_api_key`
 - `jina_reader_toolkit` — `JINA_API_KEY`
 - `deepinfra_key_generator_toolkit` — `API_KEY`, `API_TOKEN_NAME`, `MODELS`, `EXPIRES_DELTA`
@@ -707,7 +760,7 @@ chat/
 │   │   ├── tool.py
 │   │   └── meta.json
 │   ├── gws_toolkit/
-│   │   ├── tool.py          # Google Workspace — per-user OAuth2 Drive access
+│   │   ├── tool.py          # Google Workspace — per-user, per-chat OAuth2 (Drive, Gmail, Calendar, Sheets)
 │   │   └── meta.json
 │   ├── brace_toolkit/       # Brace v2 — Canvas + GitHub + Drive
 │   │   ├── tool.py

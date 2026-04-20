@@ -7,102 +7,60 @@
     "manifest": {
       "title": "Google Workspace",
       "author": "Adam Smith",
-      "author_url": "https://adamsmith.as",
-      "description": "Per-user OAuth2 access to Google Drive (read-only). Self-registers an OAuth callback endpoint.",
+      "author_url": "https://github.com/rndmcnlly/gws-toolkit",
+      "description": "Per-user, per-chat OAuth2 access to Google Workspace APIs. Ephemeral tokens — every chat starts unauthorized. Admin valves control which capabilities are available. Uses OWUI event emitters for self-contained OAuth authorization.",
       "required_open_webui_version": "0.4.0",
-      "version": "0.3.2",
+      "version": "0.7.0",
       "licence": "MIT",
       "requirements": "httpx"
     }
   },
-  "access_grants": [],
-  "updated_at": 1773131577,
+  "access_grants": [
+    {
+      "id": "02b993d4-bb0c-4bdc-a5a5-f286862d396c",
+      "resource_type": "tool",
+      "resource_id": "gws_toolkit",
+      "principal_type": "user",
+      "principal_id": "*",
+      "permission": "read",
+      "created_at": 1775510451
+    }
+  ],
+  "updated_at": 1776714495,
   "created_at": 1773131520,
   "user": null,
   "write_access": true,
   "specs": [
     {
-      "name": "_authed",
-      "description": "Common preamble: ensure routes, resolve token.\nReturns (app, user_id, token_or_none).",
-      "parameters": {
-        "properties": {},
-        "type": "object"
-      }
-    },
-    {
-      "name": "_setup",
-      "description": "Lazy route registration, called once per tool invocation.",
+      "name": "gws_action",
+      "description": "Execute a Google Workspace action. Available actions (subject to admin-enabled capabilities):\n\nCALENDAR:\n  calendar.calendars.list (requires calendar.readonly): List the user's calendars\n  calendar.events.create (requires calendar.events): Create a calendar event\n  calendar.events.delete (requires calendar.events): Delete a calendar event\n  calendar.events.get (requires calendar.readonly): Get full details of a calendar event\n  calendar.events.list (requires calendar.readonly): List or search calendar events\n  calendar.events.patch (requires calendar.events): Update specific fields of an event\n  calendar.freebusy.query (requires calendar.readonly): Check free/busy status\nDRIVE:\n  drive.files.get (requires drive.readonly): Read a Drive file\n  drive.files.list (requires drive.readonly): List folder contents\n  drive.files.search (requires drive.readonly): Search Drive files\nGMAIL:\n  gmail.drafts.create (requires gmail.compose): Create a Gmail draft (does NOT send)\n  gmail.drafts.get (requires gmail.readonly): Read a specific draft\n  gmail.drafts.list (requires gmail.readonly): List Gmail drafts\n  gmail.messages.get (requires gmail.readonly): Read a message\n  gmail.messages.search (requires gmail.readonly): Search messages\n  gmail.threads.get (requires gmail.readonly): Read all messages in a thread\n  gmail.threads.list (requires gmail.readonly): Search threads\nSHEETS:\n  sheets.spreadsheets.get (requires spreadsheets.readonly): Get spreadsheet metadata\n  sheets.values.append (requires spreadsheets): Append rows\n  sheets.values.batchGet (requires spreadsheets.readonly): Read multiple cell ranges\n  sheets.values.get (requires spreadsheets.readonly): Read a cell range\n  sheets.values.update (requires spreadsheets): Write values to a cell range",
       "parameters": {
         "properties": {
-          "app": {
+          "action": {
+            "description": "Action name (e.g. 'drive.files.search')",
+            "type": "string"
+          },
+          "params": {
+            "default": "{}",
+            "description": "JSON object of action-specific parameters",
             "type": "string"
           }
         },
-        "required": [
-          "app"
-        ],
+        "required": ["action"],
         "type": "object"
       }
     },
     {
-      "name": "connect_google_workspace",
-      "description": "Connect the user's Google account to enable Drive access.\nCall this when a user wants to link Google Workspace or when another\ntool method reports NOT_CONNECTED.",
-      "parameters": {
-        "properties": {},
-        "type": "object"
-      }
-    },
-    {
-      "name": "disconnect_google_workspace",
-      "description": "Disconnect the user's Google account. Revokes tokens.",
-      "parameters": {
-        "properties": {},
-        "type": "object"
-      }
-    },
-    {
-      "name": "list_drive_folder",
-      "description": "List files in a Google Drive folder.",
+      "name": "gws_authorize",
+      "description": "Request Google Workspace authorization for this chat, or inspect current authorization status. If capabilities is empty, returns current status. If non-empty, initiates an OAuth flow.",
       "parameters": {
         "properties": {
-          "folder_id": {
-            "default": "root",
-            "description": "Folder ID, or 'root' for the top level (default: root)",
+          "capabilities": {
+            "default": "",
+            "description": "Comma-separated capabilities to authorize (e.g. 'drive.readonly' or 'drive.readonly,calendar.readonly'). Leave empty to check status.",
             "type": "string"
           }
         },
-        "type": "object"
-      }
-    },
-    {
-      "name": "read_drive_file",
-      "description": "Read a Google Drive file by ID. Exports Docs as markdown, Sheets as CSV, Slides as text.",
-      "parameters": {
-        "properties": {
-          "file_id": {
-            "description": "The file ID (from search results or a Drive URL)",
-            "type": "string"
-          }
-        },
-        "required": [
-          "file_id"
-        ],
-        "type": "object"
-      }
-    },
-    {
-      "name": "search_drive",
-      "description": "Search the user's Google Drive for files matching a text query.",
-      "parameters": {
-        "properties": {
-          "query": {
-            "description": "Search terms (e.g. 'budget 2025', 'syllabus')",
-            "type": "string"
-          }
-        },
-        "required": [
-          "query"
-        ],
         "type": "object"
       }
     }
