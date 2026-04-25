@@ -38,13 +38,14 @@ BayLeaf is not on that list.
 
 Two things would change that:
 
-1. **A written designation of BayLeaf** (§§ 4, 7, 8 of this document)
+1. **A written designation of BayLeaf** ([§§ 4](#4-the-designation-question),
+   [7](#7-the-approval-pathway), [8](#8-a-draft-designation-memo) of this document)
    as performing institutional services under § 99.31(a)(1)(i)(B), with
    the subprocessor chain governed by § 99.33(b) redisclosure terms. This
    is the lever. It does not require UCSC to separately vet every
    subprocessor; it requires UCSC to designate BayLeaf and hold BayLeaf
    accountable for the chain beneath it.
-2. **Architectural choices that make the designation defensible** (§ 5).
+2. **Architectural choices that make the designation defensible** ([§ 5](#5-the-contract-stack-beneath-bayleaf)).
    A direct Google Cloud integration under UCSC's existing Customer
    Affiliate Agreement would put BayLeaf's Gemini traffic under the same
    UC-signed contracts that cover Workspace-Gemini. Other providers
@@ -326,8 +327,8 @@ request goes to OpenRouter, which forwards it to Google's Vertex AI
 endpoint under OpenRouter's commercial agreement with Google, not under
 any UCSC agreement.
 
-This is the fact that most shapes the designation question in § 4 and
-the contract-stack discussion in § 5.
+This is the fact that most shapes the designation question in [§ 4](#4-the-designation-question) and
+the contract-stack discussion in [§ 5](#5-the-contract-stack-beneath-bayleaf).
 
 ---
 
@@ -354,7 +355,7 @@ would have three parts, following the structure of the regulation:
    them, consistent with § 99.33(b).
 
 Designation runs to *BayLeaf the service*, not separately to each
-subprocessor. This is the "opaque unit" reading from § 2: UCSC reviews
+subprocessor. This is the "opaque unit" reading from [§ 2](#2-the-laptop-is-a-cloud-problem): UCSC reviews
 BayLeaf's posture, determines whether the contracts, technical controls,
 and operator discipline are adequate, and designates on that basis.
 BayLeaf then carries the obligation to manage the chain beneath it.
@@ -389,7 +390,7 @@ grant audit rights, and require return or destruction of records at
 termination. For BayLeaf, direct control needs to be established at
 each layer:
 
-- *BayLeaf to UCSC.* A designation memo (see § 8) establishes the
+- *BayLeaf to UCSC.* A designation memo (see [§ 8](#8-a-draft-designation-memo)) establishes the
   operator's commitment to operate BayLeaf on UCSC's behalf under these
   terms.
 - *BayLeaf to subprocessors.* BayLeaf's existing subprocessor contracts
@@ -398,7 +399,7 @@ each layer:
   the subprocessor to use data only for the purpose of providing the
   service, forbid redisclosure and training, require appropriate
   security, and permit termination with data deletion. This is a
-  reviewable artifact; § 5 summarizes the state of each.
+  reviewable artifact; [§ 5](#5-the-contract-stack-beneath-bayleaf) summarizes the state of each.
 
 **Condition 3: § 99.33(a) redisclosure limits.** This is the condition
 that runs through the chain. BayLeaf, as designated school official,
@@ -412,7 +413,7 @@ The condition is satisfiable under the current commercial contracts for
 most of the chain (DigitalOcean and Cloudflare's DPAs, OpenRouter's ZDR
 terms, provider ZDR flags) but the coverage is not uniform and is not
 UC-negotiated. A direct Google Cloud integration would upgrade a large
-slice of the inference layer to UC-signed terms (§ 5.2).
+slice of the inference layer to UC-signed terms ([§ 5.2](#52-inference-layer-proposed-direct-google-cloud)).
 
 ### 4.3 Why faculty-operated complicates the vendor frame
 
@@ -462,7 +463,7 @@ The substantive conditions are similar (subprocessors must fit some
 the reality: Adam isn't an outside vendor UCSC contracts with; Adam is
 a school official using a subprocessor chain to do institutional work.
 
-The designation memo in § 8 is drafted to work under either framing. It
+The designation memo in [§ 8](#8-a-draft-designation-memo) is drafted to work under either framing. It
 designates BayLeaf under (a)(1)(i)(B) explicitly, because that is the
 path with the clearest regulatory footing and the one UCSC's existing
 processes are built to review; it also recites the § 99.33(b) structure
@@ -486,7 +487,7 @@ for designation are in fact not required by FERPA:
 - **Certifications.** SOC 2, ISO 27001, FedRAMP, and similar are
   evidence of security maturity. They are not substitutes for a FERPA
   designation and they are not required to obtain one.
-- **Paid vendor status.** As noted in § 4.3, the regulation's "other
+- **Paid vendor status.** As noted in [§ 4.3](#43-why-faculty-operated-complicates-the-vendor-frame), the regulation's "other
   party" language is broad enough to cover non-vendor arrangements.
 - **Exclusivity.** BayLeaf's designation for the AI-tool function does
   not conflict with UCSC's existing designations of Workspace-Gemini or
@@ -494,9 +495,9 @@ for designation are in fact not required by FERPA:
   officials can be designated for overlapping or complementary
   functions.
 
-What designation does require is articulated in § 4.1: a written
+What designation does require is articulated in [§ 4.1](#41-what-designation-would-mean-for-bayleaf): a written
 determination of institutional service, a framework of direct control,
-and acceptance of the redisclosure limits. The designation memo in § 8
+and acceptance of the redisclosure limits. The designation memo in [§ 8](#8-a-draft-designation-memo)
 provides all three in concrete form.
 
 ---
@@ -617,7 +618,7 @@ negotiated rather than per-tier, the data classification is explicit,
 and the enforcement mechanisms include audit rights and breach
 notification requirements that UC negotiated directly.
 
-For the designation question in § 4, a direct Google integration
+For the designation question in [§ 4](#4-the-designation-question), a direct Google integration
 strengthens the "direct control" argument for Gemini traffic
 specifically. It does not change the posture for non-Google models,
 which continue to route through OpenRouter.
@@ -655,7 +656,7 @@ This amendment covers Google Workspace for Education.
 **2025 Google Cloud Enterprise Addendum, § 15.1(d):**
 
 The GCP/Vertex agreement contains the strong no-AI-training clause
-quoted in § 5.2 but does **not** use the "school official" formulation.
+quoted in [§ 5.2](#52-inference-layer-proposed-direct-google-cloud) but does **not** use the "school official" formulation.
 It instead relies on the no-training commitment, P4 classification, and
 the incorporated Data Processing Addendum.
 
@@ -729,7 +730,7 @@ the same Data Processing Addendum. The technical difference is that
 Workspace-Gemini is a managed Google product built on top of Vertex,
 while direct Vertex access is the raw API.
 
-For BayLeaf's designation question (§ 4), this seam matters in a
+For BayLeaf's designation question ([§ 4](#4-the-designation-question)), this seam matters in a
 specific way. Even under the strict reading, Vertex AI under UCSC's GCP
 project is substantively better-protected for FERPA purposes than any
 other inference path available to BayLeaf. A designation framework that
@@ -753,7 +754,7 @@ there is no commercial vendor. The relevant questions are UC-internal
 data-handling and inter-campus agreements, which are substantially
 easier to satisfy than external-vendor designation.
 
-For the designation question in § 4, NRP is the strongest inference
+For the designation question in [§ 4](#4-the-designation-question), NRP is the strongest inference
 path available for the open-weight models it serves. The limitation is
 that NRP does not serve the frontier proprietary models (Claude, GPT,
 Gemini) that much of BayLeaf's user base relies on.
@@ -789,7 +790,7 @@ selects, including Gemini (which currently reaches Google via
 OpenRouter rather than via UCSC's Google contract).
 
 The question this document raises is whether the designation framework
-proposed in §§ 4 and 8, combined with architectural choices in § 5,
+proposed in [§§ 4](#4-the-designation-question) and [8](#8-a-draft-designation-memo), combined with architectural choices in [§ 5](#5-the-contract-stack-beneath-bayleaf),
 would support adding BayLeaf to the P3-approved list — either as a
 whole, or specifically for its Google lane under a direct Google Cloud
 integration.
@@ -811,7 +812,7 @@ asked.
 - **Office of Campus Counsel.** Reviews contract terms for FERPA
   sufficiency. Approves the *legal form* of the designation and any
   associated agreements. For BayLeaf, Counsel would review the
-  designation memo (§ 8) and the underlying subprocessor contracts to
+  designation memo ([§ 8](#8-a-draft-designation-memo)) and the underlying subprocessor contracts to
   the extent they are material.
 - **Privacy Office / Chief Privacy Officer.** Applies UC's privacy
   framework (IS-3, the data classification scheme, the UC Statement of
@@ -873,7 +874,7 @@ mismatched:
   with [SECURITY.md](SECURITY.md), is the substantive input.
 - **Step 3 (Counsel review) is applicable but different in form.**
   There is no contract between UCSC and a vendor to negotiate. What
-  Counsel is reviewing is the designation memo (§ 8) and the adequacy
+  Counsel is reviewing is the designation memo ([§ 8](#8-a-draft-designation-memo)) and the adequacy
   of the underlying subprocessor contracts, not a new UCSC-vendor
   contract.
 - **Step 4 (Procurement execution) is probably skipped.** The
@@ -905,7 +906,7 @@ execute. This is unusual but not unprecedented: UCSC periodically
 designates volunteer or grant-funded activities that involve education
 records without procurement events.
 
-**The operator is already a school official.** As noted in § 4.3, Adam
+**The operator is already a school official.** As noted in [§ 4.3](#43-why-faculty-operated-complicates-the-vendor-frame), Adam
 is already a school official under (a)(1)(i)(A) by virtue of being a
 UCSC faculty member. Designating *BayLeaf* doesn't change Adam's
 status; it extends the institutional frame to cover the subprocessor
@@ -941,7 +942,7 @@ A complete review package for BayLeaf's designation would include:
 3. **Dependency audit** ([DEPENDENCIES.md](DEPENDENCIES.md)). Full
    inventory of services and libraries on which BayLeaf depends, with
    the ZDR boundary discussion.
-4. **Draft designation memo** (§ 8 below). The instrument UCSC would
+4. **Draft designation memo** ([§ 8](#8-a-draft-designation-memo) below). The instrument UCSC would
    sign to designate BayLeaf as a school official under
    § 99.31(a)(1)(i)(B).
 5. **Subprocessor appendix.** A table enumerating each subprocessor,
@@ -952,7 +953,7 @@ A complete review package for BayLeaf's designation would include:
    would be completed once the above artifacts are in a state Counsel
    and the Privacy Office are ready to review.
 
-Items 1–3 exist in this repository. Item 4 is provided in § 8. Items 5
+Items 1–3 exist in this repository. Item 4 is provided in [§ 8](#8-a-draft-designation-memo). Items 5
 and 6 can be prepared on request once the earlier items are reviewed.
 
 ---
@@ -1190,7 +1191,7 @@ memo is structured to surface it for decision rather than to pre-empt it.
 **Termination tied to the operator's role (§ 9).** The designation
 self-terminates when the operator ceases to hold an institutional role
 that includes school-official status. This addresses the reversibility
-issue from § 7.3 and makes the institutional risk bounded: UCSC is not
+issue from [§ 7.3](#73-whats-weird-about-running-this-pathway-for-a-faculty-operated-service) and makes the institutional risk bounded: UCSC is not
 designating a permanent vendor relationship, it is designating a
 faculty-operated service that exists as long as the faculty member
 operates it.
@@ -1221,7 +1222,7 @@ the AI tools approved for P3 data:
   designation.
 
 BayLeaf currently falls in the "not approved" set, for the reasons
-discussed in §§ 4–6. This applies regardless of which model you select
+discussed in [§§ 4](#4-the-designation-question), [5](#5-the-contract-stack-beneath-bayleaf), [6](#6-protection-levels-and-whats-already-approved). This applies regardless of which model you select
 in BayLeaf (Gemini included, since today's Gemini-in-BayLeaf goes
 through OpenRouter rather than UC's Google contract).
 
@@ -1241,7 +1242,7 @@ If the content contains FERPA-protected PII, the current options are:
   AI's suggestions back onto the identified record yourself. This
   reduces the FERPA surface regardless of which tool you use.
 
-If UCSC executes the designation memo in § 8, BayLeaf's posture
+If UCSC executes the designation memo in [§ 8](#8-a-draft-designation-memo), BayLeaf's posture
 changes in ways that will be specified in the signed memo itself. At
 minimum: UCSC has designated BayLeaf as a school official, and the
 subprocessor chain is brought within the § 99.33(b) redisclosure
@@ -1270,7 +1271,7 @@ There are two versions of this question:
    capacity?*
    Today, no. BayLeaf has no UCSC designation as a school official and
    is not on the campus-approved AI tools list for P3 data. With
-   execution of the designation memo in § 8, and at the protection
+   execution of the designation memo in [§ 8](#8-a-draft-designation-memo), and at the protection
    level selected in § 8 of that memo, yes.
 
 2. *Does BayLeaf hold education records on behalf of UCSC?*
@@ -1300,7 +1301,7 @@ that are most naturally addressed by the UCSC AI Council (with input
 from Campus Counsel, the Privacy Office, and the Information Security
 Office as needed).
 
-1. **The designation itself.** Given the draft designation memo in § 8,
+1. **The designation itself.** Given the draft designation memo in [§ 8](#8-a-draft-designation-memo),
    is UCSC willing to designate BayLeaf as a school official under
    34 CFR § 99.31(a)(1)(i)(B)? If so, what protection level should the
    designation cover (the option structure in § 8 of the memo)? What
@@ -1316,15 +1317,15 @@ Office as needed).
    Vertex/GCP-Gemini.** The Council has approved Workspace-Gemini and
    NotebookLM for P3 data on the strength of UC's negotiated Google
    agreements. Vertex AI accessed through the GCP API sits under the
-   same UC–Google agreement stack (§ 5.2–5.3 of this document). Does
+   same UC–Google agreement stack ([§§ 5.2](#52-inference-layer-proposed-direct-google-cloud), [5.3](#53-the-school-official-seam-in-the-google-stack) of this document). Does
    the P3 approval extend to Vertex-via-UCSC-GCP-project? If BayLeaf
    adds a direct Google Cloud integration, does the Google lane within
-   BayLeaf inherit this approval under the designation in § 8?
+   BayLeaf inherit this approval under the designation in [§ 8](#8-a-draft-designation-memo)?
 
 4. **Non-Google providers.** For Anthropic, OpenAI, Meta, and other
    providers reached via OpenRouter's ZDR option, no UC-signed
    institutional agreement exists. Under the designation framework in
-   § 8, does UCSC consider these providers' contractual posture
+   [§ 8](#8-a-draft-designation-memo), does UCSC consider these providers' contractual posture
    sufficient for P3 use when accessed via a designated
    faculty-operated service, or should P3 remain Google-only for the
    foreseeable future?
@@ -1337,7 +1338,7 @@ Office as needed).
    BayLeaf; BayLeaf makes it concrete.
 
 6. **Precedent for faculty-operated services.** If BayLeaf is
-   designated under § 8, does that establish a pattern that could
+   designated under [§ 8](#8-a-draft-designation-memo), does that establish a pattern that could
    support designating other faculty-operated services in the future?
    What should that pattern look like (what is the minimum viable
    review package, who is the standing signer, how is the subprocessor
