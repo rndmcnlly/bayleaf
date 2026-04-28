@@ -24,7 +24,7 @@ import { proxyRoutes } from './routes/proxy';
 import { sandboxRoutes } from './routes/sandbox';
 import { webRoutes } from './routes/web';
 import { docsRoutes } from './routes/docs';
-import { RecommendedModelResponseSchema } from './schemas';
+import { RecommendedModelResponseSchema, HealthResponseSchema } from './schemas';
 
 const app = new OpenAPIHono<AppEnv>();
 
@@ -80,6 +80,33 @@ app.openapi(recommendedModelRoute, async (c) => {
   const model = c.env.RECOMMENDED_MODEL;
   const info = await getModelInfo(model);
   return c.json({ model, name: info?.name ?? model }, 200);
+});
+
+// ── Health check endpoint ─────────────────────────────────────────
+
+const healthRoute = createRoute({
+  method: 'get',
+  path: '/health',
+  operationId: 'getHealth',
+  tags: ['Meta'],
+  summary: 'Health check',
+  description:
+    'Returns service health status. Unauthenticated, suitable for uptime monitors.',
+  security: [],
+  responses: {
+    200: {
+      description: 'Service is healthy',
+      content: {
+        'application/json': {
+          schema: HealthResponseSchema,
+        },
+      },
+    },
+  },
+});
+
+app.openapi(healthRoute, (c) => {
+  return c.json({ status: 'ok' as const, timestamp: new Date().toISOString() }, 200);
 });
 
 // ── Mount route groups ────────────────────────────────────────────

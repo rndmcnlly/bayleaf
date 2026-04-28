@@ -186,3 +186,8 @@ export const RecommendedModelResponseSchema = z.object({
   model: z.string(),
   name: z.string(),
 }).openapi('RecommendedModelResponse');
+
+export const HealthResponseSchema = z.object({
+  status: z.literal('ok'),
+  timestamp: z.string().datetime(),
+}).openapi('HealthResponse');
