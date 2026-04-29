@@ -4,57 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BayLeaf AI Playground</title>
-    <style>
-        * { box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
-            line-height: 1.6;
-            color: #333;
-        }
-        h1 { color: #1a1a1a; }
-        h2 { color: #2a5298; margin-top: 2rem; }
-        a { color: #2a5298; }
-        .tagline {
-            font-size: 1.1rem;
-            color: #666;
-            margin-bottom: 2rem;
-        }
-        .services {
-            display: flex;
-            gap: 1rem;
-            margin: 1.5rem 0;
-            flex-wrap: wrap;
-        }
-        .service-link {
-            display: inline-block;
-            background: #2a5298;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            text-decoration: none;
-            border-radius: 4px;
-            font-weight: 500;
-        }
-        .service-link:hover { background: #1e3a6e; }
-        .service-link.api { background: #2d8659; }
-        .service-link.api:hover { background: #1e5a3a; }
-        ul { padding-left: 1.5rem; }
-        li { margin-bottom: 0.5rem; }
-        .contact { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #eee; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <main id="main">
     <h1>BayLeaf AI Playground</h1>
     <p class="tagline">An experimental Generative AI Playground for UC Santa Cruz</p>
     
     <div class="services">
         <a href="https://chat.bayleaf.dev/" class="service-link">BayLeaf Chat</a>
-        <a href="https://api.bayleaf.dev" class="service-link api">BayLeaf API</a>
-        <a href="https://github.com/bayleaf-ucsc/bayleaf" class="service-link" style="background: #888;">Source</a>
-        <a href="https://stats.uptimerobot.com/tJ1Qkm7L0R" class="service-link" style="background: #888;">Status</a>
-        <a href="/support" class="service-link" style="background: #555;">Support</a>
+        <a href="https://api.bayleaf.dev" class="service-link primary-action">BayLeaf API</a>
+        <a href="https://github.com/bayleaf-ucsc/bayleaf" class="service-link" style="background: #555;">Source</a>
+        <a href="https://stats.uptimerobot.com/tJ1Qkm7L0R" class="service-link" style="background: #555;">Status</a>
+        <a href="support.html" class="service-link" style="background: #555;">Support</a>
     </div>
 
     <h2>About the AI Playground</h2>
@@ -121,16 +83,16 @@
         </li>
     </ul>
     <details>
-        <summary><strong>Subprocessors</strong> — services that handle data on behalf of BayLeaf</summary>
+        <summary><strong>Subprocessors</strong>: services that handle data on behalf of BayLeaf</summary>
         <ul>
-            <li><a href="https://openrouter.ai/">OpenRouter</a> — LLM request routing (ZDR providers only;
+            <li><a href="https://openrouter.ai/">OpenRouter</a>: LLM request routing (ZDR providers only;
                 see <a href="https://openrouter.ai/docs/guides/privacy/provider-logging#data-retention--logging">provider data retention details</a>)</li>
-            <li><a href="https://www.digitalocean.com/">DigitalOcean</a> — hosts BayLeaf Chat (application and encrypted database)</li>
-            <li><a href="https://www.cloudflare.com/">Cloudflare</a> — hosts BayLeaf API (Worker and edge database)</li>
-            <li><a href="https://www.daytona.io/">Daytona</a> — sandboxed code execution environments</li>
-            <li><a href="https://tavily.com/">Tavily</a> — web search API (no conversation data stored)</li>
-            <li><a href="https://jina.ai/reader/">Jina Reader</a> — web page content extraction</li>
-            <li><a href="https://www.cilogon.org/faq">CILogon</a> — user authentication (via CruzID Google Account OIDC)</li>
+            <li><a href="https://www.digitalocean.com/">DigitalOcean</a>: hosts BayLeaf Chat (application and encrypted database)</li>
+            <li><a href="https://www.cloudflare.com/">Cloudflare</a>: hosts BayLeaf API (Worker and edge database)</li>
+            <li><a href="https://www.daytona.io/">Daytona</a>: sandboxed code execution environments</li>
+            <li><a href="https://tavily.com/">Tavily</a>: web search API (no conversation data stored)</li>
+            <li><a href="https://jina.ai/reader/">Jina Reader</a>: web page content extraction</li>
+            <li><a href="https://www.cilogon.org/faq">CILogon</a>: user authentication (via CruzID Google Account OIDC)</li>
         </ul>
     </details>
 
@@ -292,12 +254,13 @@
         human connection, please contact
         <a href="mailto:amsmith@ucsc.edu">Adam Smith</a> directly.
     </p>
+    </main>
 
-    <div class="contact">
+    <footer class="contact">
         <strong>Contact:</strong> <a href="mailto:amsmith@ucsc.edu">Adam Smith</a> | 
         <a href="https://campusdirectory.ucsc.edu/cd_detail?uid=amsmith">UCSC Directory</a> |
         <a href="https://github.com/bayleaf-ucsc/bayleaf">GitHub</a>
-    </div>
+    </footer>
 
 
 </body>

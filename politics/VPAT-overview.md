@@ -13,7 +13,7 @@ Because BayLeaf composes surfaces from multiple sources (see [§ 2](#2-framing-m
 
 - [VPAT-chat.md](VPAT-chat.md): [`chat.bayleaf.dev`](https://chat.bayleaf.dev), Open WebUI deployment.
 - [VPAT-api.md](VPAT-api.md): [`api.bayleaf.dev`](https://api.bayleaf.dev), BayLeaf-authored Hono/JSX templates (public landing and authenticated dashboard).
-- [VPAT-landing.md](VPAT-landing.md): [`bayleaf.dev`](https://bayleaf.dev), single static HTML landing page at [`docs/index.html`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/docs/index.html).
+- [VPAT-pages.md](VPAT-pages.md): [`bayleaf.dev`](https://bayleaf.dev) and [`bayleaf.dev/support.html`](https://bayleaf.dev/support.html), two static HTML pages sharing one stylesheet at [`docs/style.css`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/docs/style.css).
 
 This overview document holds everything common across those surfaces: the template explainer, framing memo, policy drivers, evaluation methodology, open questions for campus stakeholders, future work, and references. See [§ 4](#4-per-surface-acrs) for the surface inventory and [§ 5](#5-evaluation-methodology-for-future-passes) for methodology.
 
@@ -157,13 +157,13 @@ BayLeaf operates three distinct web surfaces. The accessibility posture of each 
 |---|---|---|---|---|---|
 | BayLeaf Chat | [chat.bayleaf.dev](https://chat.bayleaf.dev) | [Open WebUI](https://openwebui.com/) (OSS, upstream) | Shared: upstream owns the UI; BayLeaf owns deployment, theme config, and model output shaping | Not Evaluated; blocked on upstream ACR question | [VPAT-chat.md](VPAT-chat.md) |
 | BayLeaf API | [api.bayleaf.dev](https://api.bayleaf.dev) | BayLeaf [Hono/JSX](https://hono.dev/) templates (public landing + authenticated dashboard) | BayLeaf | Not Evaluated; candidate for direct source-inspection pass, with a live audit for the dashboard's interactive elements | [VPAT-api.md](VPAT-api.md) |
-| bayleaf.dev landing | [bayleaf.dev](https://bayleaf.dev) | Static HTML ([`docs/index.html`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/docs/index.html)) | BayLeaf | **Partially Evaluated via source inspection** | [VPAT-landing.md](VPAT-landing.md) |
+| bayleaf.dev pages | [bayleaf.dev](https://bayleaf.dev), [bayleaf.dev/support.html](https://bayleaf.dev/support.html) | Static HTML ([`docs/index.html`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/docs/index.html), [`docs/support.html`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/docs/support.html)) sharing [`docs/style.css`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/docs/style.css) | BayLeaf | **Evaluated empirically via headless Chromium** | [VPAT-pages.md](VPAT-pages.md) |
 
 Each per-surface document carries its own header (with the service's current status line), a surface description, a full WCAG 2.1 A/AA conformance table targeting that surface, and (where applicable) surface-specific considerations. The Section 508 Chapter 3/5/6 and EN 301 549 Chapter 4-13 tables appear in each per-surface ACR because they apply to the service as a whole; the entries are identical across documents and are maintained by hand rather than generated.
 
 **Out of scope (for all surfaces):**
 
-- [`bayleaf.dev/support`](https://bayleaf.dev/support) and any future supporting pages in [`docs/`](https://github.com/bayleaf-ucsc/bayleaf/tree/main/docs). These are BayLeaf-authored HTML but the scope boundary here is pragmatic: they are small pages that will be folded into [VPAT-landing.md](VPAT-landing.md)-style direct evaluation when capacity allows, and they do not gate any BayLeaf service access.
+- Any future static pages added to [`docs/`](https://github.com/bayleaf-ucsc/bayleaf/tree/main/docs) beyond [`index.html`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/docs/index.html) and [`support.html`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/docs/support.html) (which are in scope via [VPAT-pages.md](VPAT-pages.md)). New pages will be folded into that ACR at the time they ship.
 - [GitHub Pages](https://pages.github.com/) as a platform. The platform itself is GitHub's, not BayLeaf's; GitHub publishes its own [Accessibility Conformance Reports](https://accessibility.github.com/) covering its products. BayLeaf links to github.com-hosted source, issues, and policy documents from within its UIs; those outbound destinations are covered by GitHub's own ACRs as a **courtesy disclosure**, not a claim that GitHub's ACRs cover BayLeaf-authored content.
 - The [BayLeaf API's JSON endpoints](https://api.bayleaf.dev/v1). A JSON-over-HTTP API surface is not a UI and is not directly subject to WCAG. API *documentation*, where it exists as a rendered page, is in scope through [VPAT-api.md](VPAT-api.md).
 - BayLeaf's [GitHub repository](https://github.com/bayleaf-ucsc/bayleaf) as a browsing surface. Covered by [GitHub's product ACRs](https://accessibility.github.com/).
