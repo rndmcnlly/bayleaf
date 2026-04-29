@@ -16,12 +16,22 @@ sufficient to reconstruct the service from scratch.
 
 ## 1. Infrastructure
 
+All resources live in the **`BayLeaf / UCSC`** DigitalOcean team
+(slug: `bayleaf-ucsc`), under the `adam@adamsmith.as` account with
+`amsmith@ucsc.edu` invited as a second owner. See
+`politics/ACCOUNTS.md §2` for the account/team migration history and
+handover plan.
+
+Use `doctl --context bayleaf` to target this team from the CLI; the
+default context points at the personal `Just Adam` team.
+
 ### Digital Ocean App Platform
 
 | Property | Value |
 |----------|-------|
 | **App name** | `bayleaf-chat-owui-app` |
-| **App ID** | `7d0addd4-85db-4fe3-b931-501ae88d7f7f` |
+| **App ID** | `f1a1e758-62e9-4e99-90cb-212cab12958d` |
+| **Default ingress** | `bayleaf-chat-owui-app-6uicw.ondigitalocean.app` |
 | **Region** | `sfo` |
 | **Image** | `ghcr.io/open-webui/open-webui` (version pinned in app spec) |
 | **Instance** | `apps-s-1vcpu-2gb` (1 instance) |
@@ -34,10 +44,35 @@ sufficient to reconstruct the service from scratch.
 | `chat.bayleaf.dev` / | `open-webui` service |
 | `bayleaf.dev` | About/landing page (GitHub Pages) |
 
+**DNS setup.** `chat.bayleaf.dev` is served by DigitalOcean App Platform's
+shared edge (which itself runs on Cloudflare infrastructure). In the
+Cloudflare zone for `bayleaf.dev`, `chat` is configured as two A records
+pointing at DO's published **static ingress IPs**: `172.66.0.96` and
+`162.159.140.98` (plus optional AAAA records `2606:4700:7::60` and
+`2a06:98c1:58::60`). These IPs are documented and stable per DO policy
+(see <https://docs.digitalocean.com/products/app-platform/how-to/add-ip-address/>).
+Both records are "DNS only" (grey cloud); we do NOT proxy through the
+user-owned Cloudflare layer, because DO's edge is already Cloudflare-based
+and a second layer would add latency without value. The TLS cert on
+`chat.bayleaf.dev` is issued by Google Trust Services via DO's edge, not
+Let's Encrypt.
+
+A CNAME pointing at the default ingress hostname would also work and
+reads more self-documenting, but the A-record approach is the
+DO-documented default and avoids binding the DNS record to this specific
+app's random slug (which would change if the app is ever rebuilt).
+
 ### Database
 
-Managed PostgreSQL 17 cluster `bayleaf-chat-db`. Connected via
-`${bayleaf-chat-db.DATABASE_URL}` at runtime.
+Managed PostgreSQL 17 cluster `bayleaf-chat-db`.
+
+| Property | Value |
+|----------|-------|
+| **Cluster ID** | `ea8c7549-e761-44e1-a9c3-e45e478a5202` |
+| **Engine** | PostgreSQL 17 |
+| **Region** | `sfo2` |
+| **Size** | `db-s-1vcpu-1gb` (10 GB storage, 25 max connections) |
+| **Connection** | `${bayleaf-chat-db.DATABASE_URL}` at runtime (spec binding) |
 
 ### Object Storage
 
@@ -45,9 +80,10 @@ DO Spaces bucket for file uploads and OWUI storage.
 
 | Property | Value |
 |----------|-------|
-| Bucket | `bayleaf-chat-space` |
+| Bucket | `bayleaf-ucsc-storage` |
 | Region | `sfo2` |
-| Endpoint | `https://bayleaf-chat-space.sfo2.digitaloceanspaces.com` |
+| Endpoint | `https://bayleaf-ucsc-storage.sfo2.digitaloceanspaces.com` |
+| Access key | Scoped (Read/Write/Delete on this bucket only), not account-wide full access |
 
 ### Environment Variables
 
@@ -82,11 +118,11 @@ All env vars are set with scope `RUN_AND_BUILD_TIME` unless noted.
 | `DATABASE_POOL_SIZE` | `5` | |
 | `DATABASE_URL` | `${bayleaf-chat-db.DATABASE_URL}` | Scope: `RUN_TIME` only |
 | `STORAGE_PROVIDER` | `s3` | |
-| `S3_BUCKET_NAME` | `bayleaf-chat-space` | |
-| `S3_ENDPOINT_URL` | `https://bayleaf-chat-space.sfo2.digitaloceanspaces.com` | |
+| `S3_BUCKET_NAME` | `bayleaf-ucsc-storage` | |
+| `S3_ENDPOINT_URL` | `https://bayleaf-ucsc-storage.sfo2.digitaloceanspaces.com` | |
 | `S3_REGION_NAME` | `sfo2` | |
-| `S3_ACCESS_KEY_ID` | `<REDACTED>` | |
-| `S3_SECRET_ACCESS_KEY` | `<REDACTED>` | |
+| `S3_ACCESS_KEY_ID` | `<REDACTED>` | Encrypted in DO (was plaintext in the pre-migration app; hardened to SECRET during 2026-04 migration) |
+| `S3_SECRET_ACCESS_KEY` | `<REDACTED>` | Encrypted in DO (same as above) |
 | `WEBUI_URL` | `https://chat.bayleaf.dev` | Canonical URL for OAuth callbacks |
 
 **`WEBUI_SECRET_KEY` gotcha.** OWUI's Docker entrypoint (`start.sh`) checks

@@ -12,21 +12,22 @@ documented there.
 
 ## Infrastructure
 
-DigitalOcean App Platform. Managed via `doctl`.
+DigitalOcean App Platform, in the `BayLeaf / UCSC` team (slug `bayleaf-ucsc`).
+Managed via `doctl --context bayleaf`.
 
-- **App ID**: `7d0addd4-85db-4fe3-b931-501ae88d7f7f`
+- **App ID**: `f1a1e758-62e9-4e99-90cb-212cab12958d`
 - **Image**: `ghcr.io/open-webui/open-webui` (version pinned in app spec)
-- **Database**: Managed PostgreSQL 17 (`bayleaf-chat-db`)
-- **Storage**: DO Spaces (`bayleaf-chat-space`)
+- **Database**: Managed PostgreSQL 17 (`bayleaf-chat-db`, ID `ea8c7549-e761-44e1-a9c3-e45e478a5202`)
+- **Storage**: DO Spaces (`bayleaf-ucsc-storage`, bucket-scoped access key)
 
 ## Commands
 
 ```bash
-doctl apps spec get 7d0addd4-85db-4fe3-b931-501ae88d7f7f          # View current spec
-doctl apps spec get 7d0addd4-85db-4fe3-b931-501ae88d7f7f > spec.yaml  # Save spec to file
-doctl apps spec validate spec.yaml                                  # Validate changes
-doctl apps update 7d0addd4-85db-4fe3-b931-501ae88d7f7f --spec spec.yaml  # Deploy changes
-doctl apps logs 7d0addd4-85db-4fe3-b931-501ae88d7f7f               # Tail logs
+doctl apps spec get f1a1e758-62e9-4e99-90cb-212cab12958d --context bayleaf              # View current spec
+doctl apps spec get f1a1e758-62e9-4e99-90cb-212cab12958d --context bayleaf > spec.yaml  # Save spec to file
+doctl apps spec validate spec.yaml --context bayleaf                                     # Validate (may reject EV[] values on existing apps; update still works)
+doctl apps update f1a1e758-62e9-4e99-90cb-212cab12958d --spec spec.yaml --context bayleaf  # Deploy changes
+doctl apps logs f1a1e758-62e9-4e99-90cb-212cab12958d --context bayleaf                   # Tail logs
 ```
 
 ## Env Var Changes
