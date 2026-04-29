@@ -2,8 +2,10 @@
  * Base Layout and Shared Components (hono/jsx + hono/css)
  */
 
+import type { Context } from 'hono';
 import type { FC, PropsWithChildren } from 'hono/jsx';
 import { css, Style } from 'hono/css';
+import { html } from 'hono/html';
 
 // ── Global Styles ────────────────────────────────────────────────
 
@@ -38,9 +40,18 @@ const globalStyles = css`
     footer {
       margin-top: 3rem;
       padding-top: 1rem;
-      border-top: 1px solid #ddd;
+      border-top: 1px solid #767676;
       font-size: 0.85rem;
-      color: #666;
+      color: #555;
+    }
+    a:focus-visible,
+    button:focus-visible,
+    summary:focus-visible,
+    input:focus-visible {
+      outline: 3px solid #fff;
+      outline-offset: 0;
+      box-shadow: 0 0 0 5px #2a5298;
+      border-radius: 4px;
     }
 
     /* ── Global classes referenced by client-side JS innerHTML ── */
@@ -82,9 +93,8 @@ const globalStyles = css`
     }
     .copy-hint {
       font-size: 0.85em;
-      color: #888;
+      color: #555;
       margin-left: 0.75em;
-      opacity: 0.7;
     }
     .success {
       background: #d4edda;
@@ -125,7 +135,7 @@ export const btnDangerStyle = css`
 
 export const cardStyle = css`
   background: white;
-  border: 1px solid #ddd;
+  border: 1px solid #767676;
   border-radius: 8px;
   padding: 1.5rem;
   margin: 1rem 0;
@@ -134,15 +144,19 @@ export const cardStyle = css`
 export const copyBoxStyle = css`
   display: inline-block;
   background: #f4f4f4;
-  border: 1px solid #ccc;
+  border: 1px solid #767676;
   border-radius: 4px;
   padding: 0.5rem 1rem;
   font-family: monospace;
+  font-size: 1rem;
+  color: #333;
   cursor: pointer;
   position: relative;
   margin-bottom: 0.25rem;
   user-select: all;
   transition: background 0.2s;
+  text-align: left;
+  line-height: inherit;
   &:hover { background: #e0eaff; }
 `;
 
@@ -164,7 +178,7 @@ export const statValueStyle = css`
 
 export const statLabelStyle = css`
   font-size: 0.85rem;
-  color: #666;
+  color: #555;
 `;
 
 export const errorStyle = css`
@@ -185,10 +199,12 @@ export const BaseLayout: FC<PropsWithChildren<{ title: string }>> = ({ title, ch
       <Style />
     </head>
     <body class={globalStyles}>
-      <header style="display: flex; align-items: baseline; gap: 1rem;">
+      <header style="display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap;">
         <h1 style="margin: 0;">BayLeaf API</h1>
-        <a href="/docs" style="font-size: 0.95rem;">API Reference</a>
-        <a href="/docs/SKILL.md" style="font-size: 0.95rem;">Agent Skill</a>
+        <nav aria-label="Documentation" style="display: flex; gap: 1rem;">
+          <a href="/docs" style="font-size: 0.95rem;">API Reference</a>
+          <a href="/docs/SKILL.md" style="font-size: 0.95rem;">Agent Skill</a>
+        </nav>
       </header>
       <main>
         {children}
@@ -217,7 +233,7 @@ export const RecommendedModelHint: FC<{ model: string }> = ({ model }) => {
 
 export const CodingAgentCard: FC<{ recommendedModel: string }> = ({ recommendedModel: _ }) => (
   <div class={cardStyle} style="background: #f5f0ff; border-color: #7c3aed;">
-    <h3>Use the BayLeaf API in a coding agent</h3>
+    <h2>Use the BayLeaf API in a coding agent</h2>
     <p>
       AI coding agents run in your terminal and can read, edit, and execute code on your behalf.
       (If you aren't ready for work in the command line, you can access coding agent features
@@ -230,16 +246,16 @@ export const CodingAgentCard: FC<{ recommendedModel: string }> = ({ recommendedM
     </p>
     <ul style="margin: 0.75rem 0; padding-left: 1.25rem; line-height: 1.8;">
       <li>
-        <a href="https://opencode.ai/" target="_blank"><strong>OpenCode</strong></a>{' '}
-        — good default; free models available via OpenCode Zen
+        <a href="https://opencode.ai/" target="_blank"><strong>OpenCode</strong></a>:{' '}
+        good default; free models available via OpenCode Zen
       </li>
       <li>
-        <a href="https://github.com/block/goose" target="_blank"><strong>Goose</strong></a>{' '}
-        — includes free inference credit on first launch; optional desktop app
+        <a href="https://github.com/block/goose" target="_blank"><strong>Goose</strong></a>:{' '}
+        includes free inference credit on first launch; optional desktop app
       </li>
       <li>
-        <a href="https://shittycodingagent.ai/" target="_blank"><strong>pi</strong></a>{' '}
-        — minimal core, strong extension model; bring your own API key
+        <a href="https://shittycodingagent.ai/" target="_blank"><strong>pi</strong></a>:{' '}
+        minimal core, strong extension model; bring your own API key
       </li>
     </ul>
     <p>
@@ -269,4 +285,17 @@ export const ErrorPage: FC<{ title: string; message: string }> = ({ title, messa
 /** Non-JSX wrapper for use in plain .ts files (index.ts, etc.) */
 export function renderErrorPage(title: string, message: string) {
   return <ErrorPage title={title} message={message} />;
+}
+
+// ── renderPage ───────────────────────────────────────────────────
+
+/**
+ * Render a JSX page with a proper HTML5 doctype. Hono's `c.html()` does not
+ * prepend `<!DOCTYPE html>` on its own, and a missing doctype triggers quirks
+ * mode and a WCAG 4.1.1 (Parsing) validator error. Every browser-facing route
+ * should route its response through this helper.
+ */
+// biome-ignore lint/suspicious/noExplicitAny: hono/jsx element / StatusCode passthrough
+export function renderPage(c: Context, jsx: any, status?: number) {
+  return c.html(html`<!DOCTYPE html>${jsx}`, status as any);
 }

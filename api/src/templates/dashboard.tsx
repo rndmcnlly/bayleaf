@@ -40,20 +40,20 @@ const KeyCard: FC<{ hasKey: boolean }> = ({ hasKey }) => {
   if (hasKey) {
     return (
       <div class={cardStyle} id="keyCard">
-        <h3>Your API Key</h3>
+        <h2>Your API Key</h2>
         <div id="keyDisplaySlot" />
-        <p style="margin-top: 0.5rem; font-size: 0.9em; color: #666;">
+        <p style="margin-top: 0.5rem; font-size: 0.9em; color: #555;">
           This key authenticates both the LLM inference and sandbox services below.
         </p>
-        <button class={btnDangerStyle} style="margin-top: 0.75rem;" onclick="revokeKey()">Revoke Key</button>
+        <button type="button" class={btnDangerStyle} style="margin-top: 0.75rem;" onclick="revokeKey()">Revoke Key</button>
       </div>
     );
   }
   return (
     <div class={cardStyle} id="keySection">
-      <h3>Get Your API Key</h3>
+      <h2>Get Your API Key</h2>
       <p>You don't have an API key yet. Create one to start using the BayLeaf API.</p>
-      <button class={btnStyle} onclick="createKey()">Create API Key</button>
+      <button type="button" class={btnStyle} onclick="createKey()">Create API Key</button>
     </div>
   );
 };
@@ -64,7 +64,7 @@ const LlmCard: FC<{ orKey: OpenRouterKey; recommendedModel: string }> = ({ orKey
 
   return (
     <div class={cardStyle}>
-      <h3>LLM Inference</h3>
+      <h2>LLM Inference</h2>
       <p>OpenAI-compatible chat completions and responses API, proxied through BayLeaf with zero data retention.</p>
       <div class={statsStyle}>
         <div class={statStyle}>
@@ -80,7 +80,7 @@ const LlmCard: FC<{ orKey: OpenRouterKey; recommendedModel: string }> = ({ orKey
           <div class={statLabelStyle}>This Month</div>
         </div>
       </div>
-      <p style="margin-top: 0.5rem; font-size: 0.85em; color: #666;">
+      <p style="margin-top: 0.5rem; font-size: 0.85em; color: #555;">
         Daily limit: {limitDisplay}. Resets <span id="resetHint">at midnight UTC</span>.
         Increased limits are <a href="https://bayleaf.dev/support" style="color: #2a5298;">available upon request</a>.
       </p>
@@ -88,10 +88,10 @@ const LlmCard: FC<{ orKey: OpenRouterKey; recommendedModel: string }> = ({ orKey
         <summary style="cursor: pointer; color: #006aad; font-weight: 500;">Quick start</summary>
         <div style="margin-top: 0.75rem;">
           <p><strong>Endpoint:</strong></p>
-          <div class={copyBoxStyle} onclick="copyToClipboard(this)">
+          <button type="button" class={copyBoxStyle} onclick="copyToClipboard(this)">
             <code>https://api.bayleaf.dev/v1</code>
             <span class="copy-hint">Click to copy</span>
-          </div>
+          </button>
           <p style="margin-top: 1rem;"><strong>Example:</strong></p>
           <pre><code>{`curl https://api.bayleaf.dev/v1/chat/completions \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
@@ -113,14 +113,14 @@ const SandboxCard: FC<{ sandboxInfo: SandboxInfo | null }> = ({ sandboxInfo }) =
     ? state.charAt(0).toUpperCase() + state.slice(1)
     : 'None';
   const stateColor = state === 'started' ? '#2d7d46'
-    : state === 'stopped' ? '#b88a00'
+    : state === 'stopped' ? '#7a5a00'
     : state === 'archived' ? '#3a6fb5'
     : state === 'error' ? '#c41e3a'
-    : '#666';
+    : '#555';
 
   return (
     <div class={cardStyle} id="sandboxCard">
-      <h3>Code Sandbox</h3>
+      <h2>Code Sandbox</h2>
       <p>A persistent Linux environment for running code, accessible via the API.</p>
       <div class={statsStyle}>
         <div class={statStyle}>
@@ -153,9 +153,9 @@ const SandboxCard: FC<{ sandboxInfo: SandboxInfo | null }> = ({ sandboxInfo }) =
         )}
       </div>
       {sandboxInfo ? (
-        <button class={btnDangerStyle} style="margin-top: 1rem;" onclick="deleteSandbox()">Delete Sandbox</button>
+        <button type="button" class={btnDangerStyle} style="margin-top: 1rem;" onclick="deleteSandbox()">Delete Sandbox</button>
       ) : (
-        <p style="margin-top: 0.75rem; color: #666; font-size: 0.9em;">
+        <p style="margin-top: 0.75rem; color: #555; font-size: 0.9em;">
           A sandbox will be created automatically on your first <code>POST /sandbox/exec</code> request.
         </p>
       )}
@@ -175,7 +175,7 @@ const SandboxCard: FC<{ sandboxInfo: SandboxInfo | null }> = ({ sandboxInfo }) =
           <p style="margin-top: 0.75rem;"><strong>Download a file:</strong></p>
           <pre><code>{`curl https://api.bayleaf.dev/sandbox/files/home/daytona/workspace/hello.txt \\
   -H "Authorization: Bearer YOUR_API_KEY"`}</code></pre>
-          <p style="margin-top: 0.75rem; font-size: 0.9em; color: #666;">
+          <p style="margin-top: 0.75rem; font-size: 0.9em; color: #555;">
             Sandboxes auto-stop after {sandboxInfo?.autoStopInterval ?? 15} min idle and auto-archive
             after {sandboxInfo?.autoArchiveInterval ?? 60} min stopped.
             The first request after idle may take a few seconds while the sandbox restarts.
@@ -188,7 +188,7 @@ const SandboxCard: FC<{ sandboxInfo: SandboxInfo | null }> = ({ sandboxInfo }) =
 
 const GwsCard: FC = () => (
   <div class={cardStyle} style="background: #f0f7f0; border-color: #2d7d46;">
-    <h3>Google Workspace CLI</h3>
+    <h2>Google Workspace CLI</h2>
     <p>
       Access Drive, Gmail, Calendar, Sheets, and other Google Workspace services from your
       terminal or coding agent, authenticated as your UCSC account.
@@ -204,7 +204,7 @@ const GwsCard: FC = () => (
   -o ~/.config/gws/client_secret.json`}</code></pre>
         <p style="margin-top: 0.75rem;"><strong>3. Authenticate (one-time, opens browser):</strong></p>
         <pre><code>gws auth login --account your@ucsc.edu --full</code></pre>
-        <p style="margin-top: 0.75rem; font-size: 0.9em; color: #666;">
+        <p style="margin-top: 0.75rem; font-size: 0.9em; color: #555;">
           Or hand the full setup guide to your coding agent (GWS setup is included):
         </p>
         <p style="margin: 0.25rem 0 0 0;">
@@ -219,7 +219,7 @@ const GwsCard: FC = () => (
 
 const WebCard: FC = () => (
   <div class={cardStyle} style="background: #f0f0ff; border-color: #4a4aad;">
-    <h3>Web Search & Fetch</h3>
+    <h2>Web Search & Fetch</h2>
     <p>
       Search the web and extract page content via the API, powered by Tavily and Jina Reader.
     </p>
@@ -243,7 +243,7 @@ const WebCard: FC = () => (
 
 const CanvasCard: FC = () => (
   <div class={cardStyle} style="background: #fff7f0; border-color: #c45a20;">
-    <h3>Canvas LMS</h3>
+    <h2>Canvas LMS</h2>
     <p>
       Give your coding agent access to your Canvas courses, assignments, grades, and announcements
       via the <code>canvaslms</code> CLI.
@@ -252,7 +252,7 @@ const CanvasCard: FC = () => (
       <summary style="cursor: pointer; color: #006aad; font-weight: 500;">Setup instructions</summary>
       <div style="margin-top: 0.75rem;">
         <p><strong>1. Generate a Canvas access token:</strong></p>
-        <p style="font-size: 0.9em; color: #666;">
+        <p style="font-size: 0.9em; color: #555;">
           Go to <a href="https://canvas.ucsc.edu/profile/settings" target="_blank">Canvas &rarr; Profile &rarr; Settings</a>,
           scroll to "Approved Integrations", and click <strong>New Access Token</strong>.
           Copy the token (it is only shown once). This is separate from your BayLeaf API key.
@@ -262,13 +262,13 @@ const CanvasCard: FC = () => (
 pipx inject canvaslms cryptography`}</code></pre>
         <p style="margin-top: 0.75rem;"><strong>3. Log in (interactive, stores credentials):</strong></p>
         <pre><code>canvaslms login</code></pre>
-        <p style="font-size: 0.9em; color: #666; margin-top: 0.5rem;">
+        <p style="font-size: 0.9em; color: #555; margin-top: 0.5rem;">
           Enter <code>canvas.ucsc.edu</code> as the hostname and paste your token.
           Credentials are stored in your system keyring (or a config file as fallback).
         </p>
         <p style="margin-top: 0.75rem;"><strong>4. Verify:</strong></p>
         <pre><code>canvaslms courses -i</code></pre>
-        <p style="margin-top: 0.75rem; font-size: 0.9em; color: #666;">
+        <p style="margin-top: 0.75rem; font-size: 0.9em; color: #555;">
           Or hand the full details to your coding agent (Canvas setup is included):
         </p>
         <p style="margin: 0.25rem 0 0 0;">
@@ -383,21 +383,21 @@ const DashboardScripts: FC<{ bayleafToken: string }> = ({ bayleafToken }) => (
         if (newKey) {
           sessionStorage.removeItem('newKey');
           displaySlot.innerHTML = \`
-            <div class="success" style="margin-bottom: 1rem;">
+            <div class="success" style="margin-bottom: 1rem;" role="status" aria-live="polite">
               <strong>Your new API key is ready.</strong>
               <p style="font-size: 0.9em; color: #155724; margin: 0.25rem 0 0 0;">Use the Copy button; the key is hidden to keep it safe during screen sharing.</p>
             </div>
             <div class="key-display" style="margin-bottom: 1rem;">
-              <input type="password" value="\${newKey}" id="apiKey" readonly>
-              <button class="btn copy-btn" id="copyBtn" onclick="copyToken()">Copy</button>
+              <input type="password" value="\${newKey}" id="apiKey" readonly aria-label="Your BayLeaf API key (hidden)">
+              <button type="button" class="btn copy-btn" id="copyBtn" onclick="copyToken()">Copy</button>
             </div>
           \`;
         } else if (BAYLEAF_TOKEN) {
           displaySlot.innerHTML = \`
             <div class="key-display" style="margin-bottom: 1rem;">
-              <input type="password" value="\${BAYLEAF_TOKEN}" id="apiKey" readonly>
-              <button class="btn copy-btn" id="copyBtn" onclick="copyToken()">Copy</button>
-              <button class="btn copy-btn" id="toggleBtn" onclick="toggleKeyVisibility()" style="right: 4rem;">Show</button>
+              <input type="password" value="\${BAYLEAF_TOKEN}" id="apiKey" readonly aria-label="Your BayLeaf API key (hidden)">
+              <button type="button" class="btn copy-btn" id="copyBtn" onclick="copyToken()">Copy</button>
+              <button type="button" class="btn copy-btn" id="toggleBtn" onclick="toggleKeyVisibility()" style="right: 4rem;">Show</button>
             </div>
           \`;
         }

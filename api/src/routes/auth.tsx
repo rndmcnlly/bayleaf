@@ -14,7 +14,7 @@ import { getCookie, setCookie } from 'hono/cookie';
 import type { AppEnv } from '../types';
 import { discoverOIDC } from '../constants';
 import { setSessionCookie, clearSessionCookie } from '../utils/session';
-import { ErrorPage } from '../templates/layout';
+import { ErrorPage, renderPage } from '../templates/layout';
 
 export const authRoutes = new OpenAPIHono<AppEnv>();
 
@@ -55,16 +55,16 @@ authRoutes.get('/callback', async (c) => {
   const error = c.req.query('error');
 
   if (error) {
-    return c.html(<ErrorPage title="Login Failed" message={`Identity provider returned an error: ${error}`} />, 400);
+    return renderPage(c, <ErrorPage title="Login Failed" message={`Identity provider returned an error: ${error}`} />, 400);
   }
 
   if (!code || !state) {
-    return c.html(<ErrorPage title="Login Failed" message="Missing authorization code or state." />, 400);
+    return renderPage(c, <ErrorPage title="Login Failed" message="Missing authorization code or state." />, 400);
   }
 
   // Verify state
   if (state !== getCookie(c, 'oauth_state')) {
-    return c.html(<ErrorPage title="Login Failed" message="Invalid state parameter. Please try again." />, 400);
+    return renderPage(c, <ErrorPage title="Login Failed" message="Invalid state parameter. Please try again." />, 400);
   }
 
   const oidc = await discoverOIDC(c.env.OIDC_ISSUER);
@@ -86,7 +86,7 @@ authRoutes.get('/callback', async (c) => {
   if (!tokenResponse.ok) {
     const err = await tokenResponse.text();
     console.error('Token exchange failed:', err);
-    return c.html(<ErrorPage title="Login Failed" message="Failed to exchange authorization code." />, 500);
+    return renderPage(c, <ErrorPage title="Login Failed" message="Failed to exchange authorization code." />, 500);
   }
 
   const tokens = await tokenResponse.json() as { access_token: string };
@@ -97,14 +97,14 @@ authRoutes.get('/callback', async (c) => {
   });
 
   if (!userResponse.ok) {
-    return c.html(<ErrorPage title="Login Failed" message="Failed to get user information." />, 500);
+    return renderPage(c, <ErrorPage title="Login Failed" message="Failed to get user information." />, 500);
   }
 
   const user = await userResponse.json() as { email: string; name: string; picture?: string };
 
   // Verify email domain
   if (!user.email.endsWith(`@${c.env.ALLOWED_EMAIL_DOMAIN}`)) {
-    return c.html(<ErrorPage title="Access Denied" message={`Only @${c.env.ALLOWED_EMAIL_DOMAIN} accounts are allowed.`} />, 403);
+    return renderPage(c, <ErrorPage title="Access Denied" message={`Only @${c.env.ALLOWED_EMAIL_DOMAIN} accounts are allowed.`} />, 403);
   }
 
   // Create session

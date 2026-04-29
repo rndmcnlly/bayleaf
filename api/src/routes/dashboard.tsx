@@ -11,6 +11,7 @@ import { getKeyName, findKeyByHash, createKey } from '../openrouter';
 import { findSandboxByLabel, getSandboxInfo, type SandboxInfo } from '../daytona';
 import { LandingPage } from '../templates/landing';
 import { DashboardPage } from '../templates/dashboard';
+import { renderPage } from '../templates/layout';
 
 export const dashboardRoutes = new OpenAPIHono<AppEnv>();
 
@@ -18,7 +19,7 @@ export const dashboardRoutes = new OpenAPIHono<AppEnv>();
 dashboardRoutes.get('/', async (c) => {
   const session = await getSession(c);
   if (session) return c.redirect('/dashboard');
-  return c.html(<LandingPage showCampusPass={isCampusPassEligible(c.req.raw, c.env)} recommendedModel={c.env.RECOMMENDED_MODEL} loginButtonText={c.env.OIDC_LOGIN_BUTTON_TEXT} />);
+  return renderPage(c, <LandingPage showCampusPass={isCampusPassEligible(c.req.raw, c.env)} recommendedModel={c.env.RECOMMENDED_MODEL} loginButtonText={c.env.OIDC_LOGIN_BUTTON_TEXT} />);
 });
 
 /** GET /dashboard - Main user interface */
@@ -77,5 +78,5 @@ dashboardRoutes.get('/dashboard', async (c) => {
   }
 
   const gwsEnabled = !!(c.env.GWS_CLIENT_ID && c.env.GWS_CLIENT_SECRET && c.env.GWS_PROJECT_ID);
-  return c.html(<DashboardPage session={session} row={row} orKey={orKey} recommendedModel={c.env.RECOMMENDED_MODEL} sandboxInfo={sandboxInfo} gwsEnabled={gwsEnabled} />);
+  return renderPage(c, <DashboardPage session={session} row={row} orKey={orKey} recommendedModel={c.env.RECOMMENDED_MODEL} sandboxInfo={sandboxInfo} gwsEnabled={gwsEnabled} />);
 });
