@@ -1,7 +1,7 @@
 # HECVAT 4.1.5 — BayLeaf AI Playground
 
-**Solution Provider:** Adam Smith, Associate Professor, Dept. of Computational Media, UC Santa Cruz
-**Solution Name:** BayLeaf AI Playground
+**Solution Provider:** Adam Smith, Associate Professor, Dept. of Computational Media, UC Santa Cruz  
+**Solution Name:** BayLeaf AI Playground  
 **Date:** 2026-04-29
 
 ---
