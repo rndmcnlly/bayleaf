@@ -502,7 +502,7 @@ Slides are scope-ready in the capability registry but have no handlers yet.
 Several tools require API keys configured as "valves" in the OWUI admin panel.
 These are **never** committed to this repo:
 
-- `lathe` — `daytona_api_key`, `daytona_api_url`, `daytona_proxy_url`, `deployment_label`, `auto_stop_minutes`, `auto_archive_minutes`, `auto_delete_minutes`, `sandbox_language`, `foreground_timeout_seconds`
+- `lathe` — `daytona_api_key`, `daytona_api_url`, `daytona_proxy_url`, `deployment_label`, `auto_stop_minutes`, `auto_archive_minutes`, `auto_delete_minutes`, `persistent_volume`, `sandbox_language`, `foreground_timeout_seconds`
 - `gws_toolkit` — `google_client_id`, `google_client_secret`, `base_url`, `enabled_capabilities`
 - `tavily_web_search` — `tavily_api_key`
 - `jina_reader_toolkit` — `JINA_API_KEY`
@@ -513,7 +513,7 @@ These are **never** committed to this repo:
 
 **Non-secret, non-default valve values** (safe to record as recovery backup):
 
-- `lathe`: `deployment_label` = `chat.bayleaf.dev`, `auto_delete_minutes` = `129600` (90 days)
+- `lathe`: `deployment_label` = `chat.bayleaf.dev`, `auto_delete_minutes` = `129600` (90 days), `persistent_volume` = `false`
 
 ---
 

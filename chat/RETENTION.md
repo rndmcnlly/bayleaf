@@ -202,27 +202,28 @@ updated in the job's secret env var.
 ### 7a. Code Sandbox (Lathe) Data
 
 The Code Sandbox is an **opt-in** feature: users must explicitly enable the
-toolkit and invoke a tool before any sandbox is created. User data accumulates
-in two places within the Daytona-managed sandbox:
+toolkit and invoke a tool before any sandbox is created. User data lives
+entirely within the Daytona-managed sandbox VM filesystem
+(`/home/daytona/workspace`): project files, cloned repos, build artifacts,
+installed packages.
 
-- **Workspace volume** (`/home/daytona/workspace`) — project files, cloned
-  repos, build artifacts. Ephemeral: destroyed with the sandbox VM.
-- **Persistent volume** (`/home/daytona/volume`) — S3/FUSE-backed storage
-  that survives sandbox destruction and recreation.
+**No persistent volume.** The `persistent_volume` valve is set to `false` on
+this deployment. There is no S3/FUSE-backed storage that survives sandbox
+destruction. When a sandbox is deleted, all user data within it is permanently
+removed.
 
 **Retention lifecycle (managed by Daytona, not BayLeaf):**
 
 | State | Trigger | Data preserved |
 |---|---|---|
-| Running | User tool call | Full VM + volumes |
-| Stopped | 15 min idle (`auto_stop_minutes`) | Full VM + volumes (dormant) |
-| Archived | 60 min after stop (`auto_archive_minutes`) | Persistent volume only (VM image compressed) |
-| **Deleted** | **90 days after archive (`auto_delete_minutes` = 129600)** | **Nothing: VM and all volumes permanently removed** |
+| Running | User tool call | Full VM filesystem |
+| Stopped | 15 min idle (`auto_stop_minutes`) | Full VM filesystem (dormant) |
+| Archived | 60 min after stop (`auto_archive_minutes`) | VM image compressed |
+| **Deleted** | **90 days after archive (`auto_delete_minutes` = 129600)** | **Nothing: permanently removed** |
 
 Users who need to preserve sandbox artifacts long-term should copy them out
-(via `expose(target="dufs")`, `ssh`, or `bash("cp ... /home/daytona/volume")`)
-before the 90-day inactivity window closes. Any tool call resets the idle clock,
-so active users are never affected.
+(via `expose(target="dufs")` or `ssh`) before the 90-day inactivity window
+closes. Any tool call resets the idle clock, so active users are never affected.
 
 This aligns with the 90-day retention window for conversation data (§2), giving
 users a consistent expectation: inactive data is cleaned up after one quarter
