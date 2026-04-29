@@ -1,9 +1,9 @@
 # VPAT and BayLeaf
 
 <!-- SEC:HEADER -->
-**Service:** BayLeaf AI Playground
-**Operator:** Adam Smith, Associate Professor, Dept. of Computational Media, UC Santa Cruz
-**Status:** Working draft. Not a signed ACR. Evaluation mostly pending — see [§ 5](#5-surface-inventory) and [§ 7](#7-draft-conformance-table) for the honest state of each surface.
+**Service:** BayLeaf AI Playground  
+**Operator:** Adam Smith, Associate Professor, Dept. of Computational Media, UC Santa Cruz  
+**Status:** Working draft. Not a signed ACR. Evaluation mostly pending (see [§ 5](#5-surface-inventory) and [§ 7](#7-draft-conformance-table) for the honest state of each surface).  
 **Template:** [VPAT® 2.5 INT](https://www.itic.org/policy/accessibility/vpat), covering [WCAG 2.1](https://www.w3.org/TR/WCAG21/) Level A and AA, [Revised Section 508](https://www.access-board.gov/ict/), and [EN 301 549](https://www.etsi.org/deliver/etsi_en/301500_301599/301549/).
 
 <!-- SEC:INTRO -->
@@ -41,18 +41,18 @@ interchangeably. The current version is
 [VPAT 2.5](https://www.itic.org/policy/accessibility/vpat), published in
 four editions:
 
-- **[WCAG 2.x Edition](https://www.itic.org/dotAsset/1c95f5c1-4c8a-4fa1-90a1-67a7f0d45de4.doc)** — web content only.
-- **[Revised Section 508 Edition](https://www.itic.org/dotAsset/ba601692-c81d-4f83-84a4-c9d83c3bd3fa.doc)** — US federal procurement.
-- **[EU EN 301 549 Edition](https://www.itic.org/dotAsset/9f02f58e-a0e3-42f5-8cea-80b0e0b6f83a.doc)** — European procurement.
-- **[INT (International) Edition](https://www.itic.org/dotAsset/dc611114-0d38-474b-bd72-f606832c2407.doc)** — all three combined; the common choice for US higher-ed vendors.
+- **[WCAG 2.x Edition](https://www.itic.org/dotAsset/1c95f5c1-4c8a-4fa1-90a1-67a7f0d45de4.doc):** web content only.
+- **[Revised Section 508 Edition](https://www.itic.org/dotAsset/ba601692-c81d-4f83-84a4-c9d83c3bd3fa.doc):** US federal procurement.
+- **[EU EN 301 549 Edition](https://www.itic.org/dotAsset/9f02f58e-a0e3-42f5-8cea-80b0e0b6f83a.doc):** European procurement.
+- **[INT (International) Edition](https://www.itic.org/dotAsset/dc611114-0d38-474b-bd72-f606832c2407.doc):** all three combined; the common choice for US higher-ed vendors.
 
 For each success criterion, the reporter selects one conformance level:
 
-- **Supports** — the functionality has been evaluated and meets the criterion without known defects.
-- **Partially Supports** — some functionality does not meet the criterion.
-- **Does Not Support** — the majority of functionality does not meet the criterion.
-- **Not Applicable** — the criterion is not relevant to the product.
-- **Not Evaluated** — permitted only for WCAG 2.x Level AAA criteria in the standard template; extended here by honest disclosure to other criteria the evaluation has not yet reached.
+- **Supports:** the functionality has been evaluated and meets the criterion without known defects.
+- **Partially Supports:** some functionality does not meet the criterion.
+- **Does Not Support:** the majority of functionality does not meet the criterion.
+- **Not Applicable:** the criterion is not relevant to the product.
+- **Not Evaluated:** permitted only for WCAG 2.x Level AAA criteria in the standard template; extended here by honest disclosure to other criteria the evaluation has not yet reached.
 
 The canonical reference for the vocabulary is the
 [VPAT 2.5 instructions](https://www.itic.org/policy/accessibility/vpat)
@@ -89,14 +89,14 @@ Several VPAT questions (evaluation methodology from the vendor's
 internal accessibility team, designated accessibility product manager,
 quarterly conformance updates, accessibility-trained QA) presume an
 enterprise vendor posture. Those answers are "no" here, and the
-*Remarks* fields throughout this document explain the honest substitute
-— typically either (a) the accessibility posture of the upstream
+*Remarks* fields throughout this document explain the honest substitute:
+typically either (a) the accessibility posture of the upstream
 project (Open WebUI) whose conformance BayLeaf inherits, or (b) direct
 source-level evaluation of the small BayLeaf-authored surfaces.
 
 The external driver is real. The 2024
 [ADA Title II final rule](https://www.federalregister.gov/documents/2024/04/24/2024-07758/nondiscrimination-on-the-basis-of-disability-accessibility-of-web-information-and-services-of-state)
-obligates state and local government entities — including UC — to make
+obligates state and local government entities (including UC) to make
 web content and mobile apps conform to WCAG 2.1 Level AA. The
 compliance deadline is
 [April 24, 2026](https://www.ada.gov/resources/2024-03-08-web-rule/)
@@ -108,11 +108,11 @@ BayLeaf's VPAT exists so that posture is defensible.
 
 **Supporting documents (in-repo):**
 
-- [HECVAT.md](HECVAT.md) — security questionnaire with framing memo.
-- [FERPA.md](FERPA.md) — student-privacy analysis and draft designation memo.
-- [SECURITY.md](SECURITY.md) — platform data-handling exhibit.
-- [../chat/DESIGN.md](../chat/DESIGN.md) — full BayLeaf Chat architecture.
-- [DEPENDENCIES.md](DEPENDENCIES.md) — dependency audit (the upstream inheritance map for code; this VPAT is the accessibility analogue).
+- [HECVAT.md](HECVAT.md): security questionnaire with framing memo.
+- [FERPA.md](FERPA.md): student-privacy analysis and draft designation memo.
+- [SECURITY.md](SECURITY.md): platform data-handling exhibit.
+- [../chat/DESIGN.md](../chat/DESIGN.md): full BayLeaf Chat architecture.
+- [DEPENDENCIES.md](DEPENDENCIES.md): dependency audit (the upstream inheritance map for code; this VPAT is the accessibility analogue).
 
 ---
 
@@ -173,14 +173,14 @@ to make that inherited obligation legible and reviewable.
 
 **In scope:**
 
-- [`chat.bayleaf.dev`](https://chat.bayleaf.dev) — BayLeaf Chat, Open
+- [`chat.bayleaf.dev`](https://chat.bayleaf.dev): BayLeaf Chat, Open
   WebUI deployment (see [§ 5.1](#51-bayleaf-chat-chatbayleafdev)).
-- [`api.bayleaf.dev`](https://api.bayleaf.dev) landing page —
+- [`api.bayleaf.dev`](https://api.bayleaf.dev) landing page:
   BayLeaf-authored Hono/JSX template (see [§ 5.2](#52-bayleaf-api-landing-apibayleafdev)).
-- [`api.bayleaf.dev/dashboard`](https://api.bayleaf.dev/dashboard) —
+- [`api.bayleaf.dev/dashboard`](https://api.bayleaf.dev/dashboard):
   BayLeaf-authored Hono/JSX template with auth and key management (see
   [§ 5.3](#53-bayleaf-api-dashboard-apibayleafdevdashboard)).
-- [`bayleaf.dev`](https://bayleaf.dev) — single static landing page at
+- [`bayleaf.dev`](https://bayleaf.dev): single static landing page at
   [`docs/index.html`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/docs/index.html),
   served via GitHub Pages (see [§ 5.4](#54-bayleafdev-landing-docsindexhtml)).
 
@@ -189,7 +189,7 @@ to make that inherited obligation legible and reviewable.
 - [`bayleaf.dev/support`](https://bayleaf.dev/support) and any future
   supporting pages in [`docs/`](https://github.com/bayleaf-ucsc/bayleaf/tree/main/docs).
   These are BayLeaf-authored HTML but the scope boundary here is
-  pragmatic — they are small pages that will be folded into
+  pragmatic: they are small pages that will be folded into
   [§ 5.4](#54-bayleafdev-landing-docsindexhtml)-style direct evaluation when capacity allows, and
   they do not gate any BayLeaf service access.
 - [GitHub Pages](https://pages.github.com/) as a platform. The platform
@@ -247,7 +247,7 @@ itself:
   (see [../chat/models/](https://github.com/bayleaf-ucsc/bayleaf/tree/main/chat/models)).
   System prompts can nudge model output toward more accessible
   formatting (e.g., asking for alt text on generated images, preferring
-  lists and headings over dense paragraphs) — see [§ 6](#6-ai-generated-output-as-an-accessibility-surface).
+  lists and headings over dense paragraphs); see [§ 6](#6-ai-generated-output-as-an-accessibility-surface).
 - Tool/function definitions
   ([chat/tools/](https://github.com/bayleaf-ucsc/bayleaf/tree/main/chat/tools)).
 - Theme, logo, and copy customizations applied via Open WebUI's
@@ -264,7 +264,7 @@ contribution or a fork.
 accessibility statement from the Open WebUI project.* Relevant places
 to check and cite when the question is re-opened:
 
-- Open WebUI [documentation site](https://docs.openwebui.com/) —
+- Open WebUI [documentation site](https://docs.openwebui.com/):
   search for "accessibility", "a11y", "VPAT", "WCAG".
 - Open WebUI [repository README](https://github.com/open-webui/open-webui/blob/main/README.md)
   and [SECURITY.md](https://github.com/open-webui/open-webui/blob/main/SECURITY.md).
@@ -311,9 +311,9 @@ things the operator has noticed in day-to-day use, not an audit:
 [Hono](https://hono.dev/) on Cloudflare Workers. The relevant files
 are small and source-inspectable:
 
-- [`api/src/templates/layout.tsx`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/api/src/templates/layout.tsx) — shared `BaseLayout`, `cardStyle`, `btnStyle`, `RecommendedModelHint`.
-- [`api/src/templates/landing.tsx`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/api/src/templates/landing.tsx) — the public landing page.
-- [`api/src/routes/dashboard.tsx`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/api/src/routes/dashboard.tsx) — route handler that renders `LandingPage` when unauthenticated.
+- [`api/src/templates/layout.tsx`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/api/src/templates/layout.tsx): shared `BaseLayout`, `cardStyle`, `btnStyle`, `RecommendedModelHint`.
+- [`api/src/templates/landing.tsx`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/api/src/templates/landing.tsx): the public landing page.
+- [`api/src/routes/dashboard.tsx`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/api/src/routes/dashboard.tsx): route handler that renders `LandingPage` when unauthenticated.
 
 **What this surface contains.** A heading, a paragraph of copy, a
 "sign in" link styled as a button, and a conditional card announcing
@@ -357,9 +357,9 @@ pass completes the picture.
 **UI origin.** BayLeaf-authored Hono/JSX, same stack as [§ 5.2](#52-bayleaf-api-landing-apibayleafdev).
 Relevant files:
 
-- [`api/src/templates/dashboard.tsx`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/api/src/templates/dashboard.tsx) — the rendered dashboard.
-- [`api/src/routes/dashboard.tsx`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/api/src/routes/dashboard.tsx) — the route handler, including the auth gate and key-provisioning flow.
-- [`api/src/templates/layout.tsx`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/api/src/templates/layout.tsx) — shared layout.
+- [`api/src/templates/dashboard.tsx`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/api/src/templates/dashboard.tsx): the rendered dashboard.
+- [`api/src/routes/dashboard.tsx`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/api/src/routes/dashboard.tsx): the route handler, including the auth gate and key-provisioning flow.
+- [`api/src/templates/layout.tsx`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/api/src/templates/layout.tsx): shared layout.
 
 **What this surface contains.** Reachable only after OIDC sign-in
 (CILogon → UCSC CruzID). Displays the user's API key (or a provisioning
@@ -376,11 +376,11 @@ keyboard-reachability of dynamically-inserted content.
 
 **Criteria that want explicit attention.**
 
-- [2.1.1 Keyboard](https://www.w3.org/WAI/WCAG21/Understanding/keyboard) — every action must be keyboard-reachable.
-- [2.4.3 Focus Order](https://www.w3.org/WAI/WCAG21/Understanding/focus-order) — logical tab order through the key management sections.
-- [2.4.7 Focus Visible](https://www.w3.org/WAI/WCAG21/Understanding/focus-visible) — custom-styled buttons must retain a visible focus ring.
-- [3.3.1 Error Identification](https://www.w3.org/WAI/WCAG21/Understanding/error-identification) and [3.3.3 Error Suggestion](https://www.w3.org/WAI/WCAG21/Understanding/error-suggestion) — error messaging on key provisioning.
-- [4.1.3 Status Messages](https://www.w3.org/WAI/WCAG21/Understanding/status-messages) — success/failure announcements after key operations should use ARIA live regions.
+- [2.1.1 Keyboard](https://www.w3.org/WAI/WCAG21/Understanding/keyboard): every action must be keyboard-reachable.
+- [2.4.3 Focus Order](https://www.w3.org/WAI/WCAG21/Understanding/focus-order): logical tab order through the key management sections.
+- [2.4.7 Focus Visible](https://www.w3.org/WAI/WCAG21/Understanding/focus-visible): custom-styled buttons must retain a visible focus ring.
+- [3.3.1 Error Identification](https://www.w3.org/WAI/WCAG21/Understanding/error-identification) and [3.3.3 Error Suggestion](https://www.w3.org/WAI/WCAG21/Understanding/error-suggestion): error messaging on key provisioning.
+- [4.1.3 Status Messages](https://www.w3.org/WAI/WCAG21/Understanding/status-messages): success/failure announcements after key operations should use ARIA live regions.
 
 **Links for the future evaluation pass.**
 
@@ -426,7 +426,7 @@ JavaScript.
 - [1.4.3 Contrast Minimum](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum):
   the inline CSS uses `#333` on white (ratio ≈ 12.6:1, passes AA),
   `#2a5298` on white (≈ 6.4:1, passes AA normal), white on `#2a5298`
-  (same 6.4:1, passes AA), white on `#2d8659` (~4.5:1, borderline —
+  (same 6.4:1, passes AA), white on `#2d8659` (~4.5:1, borderline;
   wants verification with the
   [WebAIM contrast checker](https://webaim.org/resources/contrastchecker/)),
   white on `#888` (~3.5:1, **fails 1.4.3 AA for normal text**, passes
@@ -476,7 +476,7 @@ rendering, issue forms) whose accessibility is GitHub's responsibility.
 GitHub publishes current ACRs at
 [accessibility.github.com](https://accessibility.github.com/) covering
 github.com and related products. This VPAT notes those ACRs as a
-**courtesy disclosure** — a reader following a BayLeaf outbound link
+**courtesy disclosure**: a reader following a BayLeaf outbound link
 into a GitHub-rendered page is landing on a surface covered by
 GitHub's own conformance report, not by BayLeaf's.
 
@@ -521,24 +521,24 @@ anyone relying on those tools in an institutional context.
 
 **Relevant WCAG 2.1 success criteria applied to model output:**
 
-- [1.1.1 Non-text Content](https://www.w3.org/WAI/WCAG21/Understanding/non-text-content) —
+- [1.1.1 Non-text Content](https://www.w3.org/WAI/WCAG21/Understanding/non-text-content):
   generated images (DALL·E, Imagen, etc.) rendered in the chat UI need
   alt text. The model can be prompted to provide a description
   alongside any generated image; the UI must render it as an `alt`
   attribute or equivalent. This is a joint UI/prompt responsibility.
-- [1.3.1 Info and Relationships](https://www.w3.org/WAI/WCAG21/Understanding/info-and-relationships) —
+- [1.3.1 Info and Relationships](https://www.w3.org/WAI/WCAG21/Understanding/info-and-relationships):
   when a model emits markdown tables, lists, or headings, the UI's
   markdown renderer must preserve those semantics in the DOM.
   Malformed markdown (which LLMs sometimes produce) can produce
   inaccessible output even when the renderer is correct.
-- [1.4.5 Images of Text](https://www.w3.org/WAI/WCAG21/Understanding/images-of-text) —
+- [1.4.5 Images of Text](https://www.w3.org/WAI/WCAG21/Understanding/images-of-text):
   models occasionally return ASCII art, rendered diagrams, or
   screenshots when text would serve. The system prompt is a lever for
   steering away from this.
-- [2.4.6 Headings and Labels](https://www.w3.org/WAI/WCAG21/Understanding/headings-and-labels) —
+- [2.4.6 Headings and Labels](https://www.w3.org/WAI/WCAG21/Understanding/headings-and-labels):
   long model responses benefit from heading structure; the system
   prompt can encourage this for long answers.
-- [4.1.3 Status Messages](https://www.w3.org/WAI/WCAG21/Understanding/status-messages) —
+- [4.1.3 Status Messages](https://www.w3.org/WAI/WCAG21/Understanding/status-messages):
   this is the biggest one for streamed chat. As tokens stream in,
   screen readers need to know content is arriving without being
   flooded by every token. The standard pattern is an ARIA live
@@ -571,7 +571,7 @@ settled best practices. Relevant entry points:
 
 - W3C [Accessibility of Remote Meetings](https://www.w3.org/TR/remote-meetings/)
   (has some applicable live-region pattern discussion).
-- [W3C APG — Live Region patterns](https://www.w3.org/WAI/ARIA/apg/patterns/alert/)
+- [W3C APG: Live Region patterns](https://www.w3.org/WAI/ARIA/apg/patterns/alert/)
   and [status](https://www.w3.org/WAI/ARIA/apg/patterns/alertdialog/) documentation.
 - Deque [screen reader announcements in streaming UIs](https://www.deque.com/blog/)
   (search for streaming / live region content).
@@ -602,10 +602,10 @@ conformance vocabulary is defined in [§ 1](#1-what-a-vpat-is-and-why-this-one-l
 
 The **surface** column uses these abbreviations:
 
-- **Chat** — [chat.bayleaf.dev](https://chat.bayleaf.dev) ([§ 5.1](#51-bayleaf-chat-chatbayleafdev))
-- **API-L** — [api.bayleaf.dev](https://api.bayleaf.dev) landing ([§ 5.2](#52-bayleaf-api-landing-apibayleafdev))
-- **API-D** — [api.bayleaf.dev/dashboard](https://api.bayleaf.dev/dashboard) ([§ 5.3](#53-bayleaf-api-dashboard-apibayleafdevdashboard))
-- **Landing** — [bayleaf.dev](https://bayleaf.dev) / [`docs/index.html`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/docs/index.html) ([§ 5.4](#54-bayleafdev-landing-docsindexhtml))
+- **Chat:** [chat.bayleaf.dev](https://chat.bayleaf.dev) ([§ 5.1](#51-bayleaf-chat-chatbayleafdev))
+- **API-L:** [api.bayleaf.dev](https://api.bayleaf.dev) landing ([§ 5.2](#52-bayleaf-api-landing-apibayleafdev))
+- **API-D:** [api.bayleaf.dev/dashboard](https://api.bayleaf.dev/dashboard) ([§ 5.3](#53-bayleaf-api-dashboard-apibayleafdevdashboard))
+- **Landing:** [bayleaf.dev](https://bayleaf.dev) / [`docs/index.html`](https://github.com/bayleaf-ucsc/bayleaf/blob/main/docs/index.html) ([§ 5.4](#54-bayleafdev-landing-docsindexhtml))
 
 Each criterion name links to the official WCAG 2.1 *Understanding*
 document so future evaluators can look up the intent, the Success
@@ -635,11 +635,11 @@ criterion.
 | 1.3.3 | [Sensory Characteristics](https://www.w3.org/WAI/WCAG21/Understanding/sensory-characteristics) | N/E | N/E | N/E | Supports | Landing: no instructions rely on shape, size, or location. |
 | 1.4.1 | [Use of Color](https://www.w3.org/WAI/WCAG21/Understanding/use-of-color) | N/E | N/E | N/E | Supports | Landing: color is not the sole means of conveying information; link text is descriptive independent of color. |
 | 1.4.2 | [Audio Control](https://www.w3.org/WAI/WCAG21/Understanding/audio-control) | N/A | N/A | N/A | N/A | No auto-playing audio. |
-| 2.1.1 | [Keyboard](https://www.w3.org/WAI/WCAG21/Understanding/keyboard) | N/E | N/E | N/E | Supports | Landing: all interactive elements are native `<a>` and `<details>` — keyboard-operable by default. API-D wants explicit live-audit confirmation. |
+| 2.1.1 | [Keyboard](https://www.w3.org/WAI/WCAG21/Understanding/keyboard) | N/E | N/E | N/E | Supports | Landing: all interactive elements are native `<a>` and `<details>`, keyboard-operable by default. API-D wants explicit live-audit confirmation. |
 | 2.1.2 | [No Keyboard Trap](https://www.w3.org/WAI/WCAG21/Understanding/no-keyboard-trap) | N/E | N/E | N/E | Supports | Landing: no modal, no custom focus traps. |
 | 2.1.4 | [Character Key Shortcuts](https://www.w3.org/WAI/WCAG21/Understanding/character-key-shortcuts) | N/E | N/A | N/A | N/A | Open WebUI may bind character shortcuts; verify in Chat evaluation. |
 | 2.2.1 | [Timing Adjustable](https://www.w3.org/WAI/WCAG21/Understanding/timing-adjustable) | N/E | N/A | N/E | N/A | Sessions on API-D expire; verify whether session timeouts can be extended or warned about. |
-| 2.2.2 | [Pause, Stop, Hide](https://www.w3.org/WAI/WCAG21/Understanding/pause-stop-hide) | N/E | N/A | N/A | N/A | Streamed chat responses are arguably "moving" content — examine in Chat evaluation with [§ 6](#6-ai-generated-output-as-an-accessibility-surface) in mind. |
+| 2.2.2 | [Pause, Stop, Hide](https://www.w3.org/WAI/WCAG21/Understanding/pause-stop-hide) | N/E | N/A | N/A | N/A | Streamed chat responses are arguably "moving" content; examine in Chat evaluation with [§ 6](#6-ai-generated-output-as-an-accessibility-surface) in mind. |
 | 2.3.1 | [Three Flashes or Below Threshold](https://www.w3.org/WAI/WCAG21/Understanding/three-flashes-or-below-threshold) | N/E | Supports | Supports | Supports | No flashing content on any BayLeaf-authored surface. |
 | 2.4.1 | [Bypass Blocks](https://www.w3.org/WAI/WCAG21/Understanding/bypass-blocks) | N/E | N/E | N/E | Partially Supports | Landing: no skip-link, but the page is short and has only one navigation block; adding a skip-link is a minor future improvement. A single `<main>` landmark would also help. |
 | 2.4.2 | [Page Titled](https://www.w3.org/WAI/WCAG21/Understanding/page-titled) | N/E | N/E | N/E | Supports | Landing: `<title>BayLeaf AI Playground</title>`. API templates need source check for `<title>`. |
@@ -694,7 +694,7 @@ BayLeaf has not targeted AAA and does not claim it. The
 [full AAA criterion list](https://www.w3.org/TR/WCAG21/#conformance-reqs)
 is available from W3C for readers interested in the next tier.
 
-### 7.3 Revised Section 508 — Chapters 3, 4, 5, 6
+### 7.3 Revised Section 508: Chapters 3, 4, 5, 6
 
 [Revised Section 508](https://www.access-board.gov/ict/) incorporates
 WCAG 2.0 Level A and AA by reference for web content (Chapter 5:
@@ -740,7 +740,7 @@ WCAG path; see [§ 7.2](#72-wcag-21-level-aa).
 | [602.4](https://www.access-board.gov/ict/#602.4) | Alternate Formats for Non-Electronic Support Documentation | N/A | No non-electronic documentation. |
 | [603](https://www.access-board.gov/ict/#603) | Support Services | Supports | Support is via email to the operator ([amsmith@ucsc.edu](mailto:amsmith@ucsc.edu)); email is an accessible medium. |
 
-### 7.4 EN 301 549 — chapters not covered above
+### 7.4 EN 301 549: chapters not covered above
 
 [EN 301 549 v3.2.1](https://www.etsi.org/deliver/etsi_en/301500_301599/301549/03.02.01_60/en_301549v030201p.pdf)
 is the European harmonized standard for ICT accessibility. It
@@ -753,7 +753,7 @@ chapters are Not Applicable.
 | Chapter | Title | Applies? | Remarks |
 |---|---|---|---|
 | [4](https://www.etsi.org/deliver/etsi_en/301500_301599/301549/03.02.01_60/en_301549v030201p.pdf) | Functional Performance Statements | Via WCAG | Parallels Section 508 Chapter 3; discharged via WCAG conformance. |
-| [5](https://www.etsi.org/deliver/etsi_en/301500_301599/301549/03.02.01_60/en_301549v030201p.pdf) | Generic Requirements | Partially Applies | 5.1 (closed functionality), 5.2 (biometrics), 5.3 (privacy of AT), 5.4 (preservation of info through conversion), 5.5 (operable parts), 5.6 (locking/toggle), 5.7 (key repeat), 5.8 (double-strike), 5.9 (simultaneous user actions) — all N/A for a web-only service without biometrics or hardware controls. |
+| [5](https://www.etsi.org/deliver/etsi_en/301500_301599/301549/03.02.01_60/en_301549v030201p.pdf) | Generic Requirements | Partially Applies | 5.1 (closed functionality), 5.2 (biometrics), 5.3 (privacy of AT), 5.4 (preservation of info through conversion), 5.5 (operable parts), 5.6 (locking/toggle), 5.7 (key repeat), 5.8 (double-strike), 5.9 (simultaneous user actions): all N/A for a web-only service without biometrics or hardware controls. |
 | [6](https://www.etsi.org/deliver/etsi_en/301500_301599/301549/03.02.01_60/en_301549v030201p.pdf) | ICT with Two-Way Voice Communication | N/A | No voice communication. |
 | [7](https://www.etsi.org/deliver/etsi_en/301500_301599/301549/03.02.01_60/en_301549v030201p.pdf) | ICT with Video Capabilities | N/A | No video playback or capture. |
 | [8](https://www.etsi.org/deliver/etsi_en/301500_301599/301549/03.02.01_60/en_301549v030201p.pdf) | Hardware | N/A | Not hardware. |
@@ -780,19 +780,19 @@ remainder requires keyboard and screen-reader evaluation.
 **Automated tooling** to run against each live surface:
 
 - **[axe DevTools](https://www.deque.com/axe/devtools/)** (browser
-  extension, free tier) — the industry baseline. Runs `axe-core`
+  extension, free tier): the industry baseline. Runs `axe-core`
   which is also available as a [CLI](https://github.com/dequelabs/axe-core-npm/tree/develop/packages/cli)
   and [CI-friendly library](https://github.com/dequelabs/axe-core).
 - **[Lighthouse](https://developer.chrome.com/docs/lighthouse/accessibility/)**
-  (built into Chrome DevTools) — runs a subset of `axe-core` rules;
+  (built into Chrome DevTools): runs a subset of `axe-core` rules;
   useful as a second opinion and for performance/SEO at the same time.
-- **[WAVE](https://wave.webaim.org/)** (WebAIM) — a different ruleset
+- **[WAVE](https://wave.webaim.org/)** (WebAIM): a different ruleset
   from axe, good at catching things axe misses (and vice versa).
   Available as a [browser extension](https://wave.webaim.org/extension/).
-- **[pa11y](https://github.com/pa11y/pa11y)** — command-line tool,
+- **[pa11y](https://github.com/pa11y/pa11y):** command-line tool,
   suitable for CI. Uses HTML_CodeSniffer or axe as its engine.
 - **[Accessibility Insights for Web](https://accessibilityinsights.io/docs/web/overview/)**
-  (Microsoft) — adds structured manual tests (the "Assessment" mode)
+  (Microsoft): adds structured manual tests (the "Assessment" mode)
   on top of automated checks.
 
 **Manual testing**, per surface:
@@ -947,16 +947,16 @@ tools/a11y/
 
 Candidate tools for the harness:
 
-- [`@axe-core/cli`](https://github.com/dequelabs/axe-core-npm/tree/develop/packages/cli) — headless axe runs from the command line.
-- [`pa11y`](https://github.com/pa11y/pa11y) and [`pa11y-ci`](https://github.com/pa11y/pa11y-ci) — CI-oriented runner.
-- [`lighthouse-ci`](https://github.com/GoogleChrome/lighthouse-ci) — if the project also wants performance/SEO reporting in the same harness.
-- [`playwright`](https://playwright.dev/docs/accessibility-testing) with [`@axe-core/playwright`](https://github.com/dequelabs/axe-core-npm/tree/develop/packages/playwright) — for authenticated surfaces like the dashboard.
+- [`@axe-core/cli`](https://github.com/dequelabs/axe-core-npm/tree/develop/packages/cli): headless axe runs from the command line.
+- [`pa11y`](https://github.com/pa11y/pa11y) and [`pa11y-ci`](https://github.com/pa11y/pa11y-ci): CI-oriented runner.
+- [`lighthouse-ci`](https://github.com/GoogleChrome/lighthouse-ci): if the project also wants performance/SEO reporting in the same harness.
+- [`playwright`](https://playwright.dev/docs/accessibility-testing) with [`@axe-core/playwright`](https://github.com/dequelabs/axe-core-npm/tree/develop/packages/playwright): for authenticated surfaces like the dashboard.
 
 **What automation cannot do.** Automated scans do not substitute for
 manual screen-reader and keyboard passes; per [§ 8](#8-evaluation-methodology-for-future-passes)
 they catch at best around half of real issues. The harness's value is
-(a) regression detection — surfacing newly-introduced violations on
-every commit, and (b) producing durable evidence a reviewer can point
+(a) regression detection (surfacing newly-introduced violations on
+every commit), and (b) producing durable evidence a reviewer can point
 to. The honest accessibility story still depends on periodic manual
 passes.
 
@@ -987,82 +987,82 @@ Reasonable cadences:
 
 ### VPAT template and guidance
 
-- [ITI VPAT 2.5](https://www.itic.org/policy/accessibility/vpat) — current template and editions.
-- [ITI Accessibility Resources](https://www.itic.org/policy/accessibility/accessibility-resources) — guidance on completing a VPAT.
-- [VPAT 2.5 INT (International) Edition](https://www.itic.org/dotAsset/dc611114-0d38-474b-bd72-f606832c2407.doc) — the edition this document follows.
+- [ITI VPAT 2.5](https://www.itic.org/policy/accessibility/vpat): current template and editions.
+- [ITI Accessibility Resources](https://www.itic.org/policy/accessibility/accessibility-resources): guidance on completing a VPAT.
+- [VPAT 2.5 INT (International) Edition](https://www.itic.org/dotAsset/dc611114-0d38-474b-bd72-f606832c2407.doc): the edition this document follows.
 - [VPAT 2.5 WCAG Edition](https://www.itic.org/dotAsset/1c95f5c1-4c8a-4fa1-90a1-67a7f0d45de4.doc).
 - [VPAT 2.5 Section 508 Edition](https://www.itic.org/dotAsset/ba601692-c81d-4f83-84a4-c9d83c3bd3fa.doc).
 - [VPAT 2.5 EN 301 549 Edition](https://www.itic.org/dotAsset/9f02f58e-a0e3-42f5-8cea-80b0e0b6f83a.doc).
 
 ### Standards
 
-- [WCAG 2.1](https://www.w3.org/TR/WCAG21/) — W3C Recommendation, the success-criterion set this document targets.
-- [WCAG 2.1 Understanding](https://www.w3.org/WAI/WCAG21/Understanding/) — normative explanations per criterion (linked row-by-row in [§ 7](#7-draft-conformance-table)).
-- [WCAG 2.2](https://www.w3.org/TR/WCAG22/) — next version; noted for context, not targeted by this ACR.
-- [Revised Section 508 Standards](https://www.access-board.gov/ict/) — US Access Board.
-- [Section 508 ICT Testing Baseline](https://section508coordinators.github.io/ICTTestingBaseline/) — community-maintained test procedures.
-- [EN 301 549 v3.2.1](https://www.etsi.org/deliver/etsi_en/301500_301599/301549/03.02.01_60/en_301549v030201p.pdf) — ETSI harmonized European standard.
-- [ARIA Authoring Practices Guide](https://www.w3.org/WAI/ARIA/apg/) — W3C patterns for common widgets.
-- [ARIA 1.2](https://www.w3.org/TR/wai-aria-1.2/) — W3C Recommendation.
+- [WCAG 2.1](https://www.w3.org/TR/WCAG21/): W3C Recommendation, the success-criterion set this document targets.
+- [WCAG 2.1 Understanding](https://www.w3.org/WAI/WCAG21/Understanding/): normative explanations per criterion (linked row-by-row in [§ 7](#7-draft-conformance-table)).
+- [WCAG 2.2](https://www.w3.org/TR/WCAG22/): next version; noted for context, not targeted by this ACR.
+- [Revised Section 508 Standards](https://www.access-board.gov/ict/): US Access Board.
+- [Section 508 ICT Testing Baseline](https://section508coordinators.github.io/ICTTestingBaseline/): community-maintained test procedures.
+- [EN 301 549 v3.2.1](https://www.etsi.org/deliver/etsi_en/301500_301599/301549/03.02.01_60/en_301549v030201p.pdf): ETSI harmonized European standard.
+- [ARIA Authoring Practices Guide](https://www.w3.org/WAI/ARIA/apg/): W3C patterns for common widgets.
+- [ARIA 1.2](https://www.w3.org/TR/wai-aria-1.2/): W3C Recommendation.
 
 ### Law and regulation
 
-- [ADA Title II Final Rule (2024)](https://www.federalregister.gov/documents/2024/04/24/2024-07758/nondiscrimination-on-the-basis-of-disability-accessibility-of-web-information-and-services-of-state) — Federal Register entry.
-- [DOJ Web Rule Resources](https://www.ada.gov/resources/2024-03-08-web-rule/) — plain-language summary.
+- [ADA Title II Final Rule (2024)](https://www.federalregister.gov/documents/2024/04/24/2024-07758/nondiscrimination-on-the-basis-of-disability-accessibility-of-web-information-and-services-of-state): Federal Register entry.
+- [DOJ Web Rule Resources](https://www.ada.gov/resources/2024-03-08-web-rule/): plain-language summary.
 - [DOJ Fact Sheet on the Web Rule](https://www.ada.gov/notices/2024/04/08/fact-sheet-web-rule/).
 - [DOJ Small Entity Compliance Guide](https://www.ada.gov/resources/small-entity-compliance-guide/).
-- [Section 504 of the Rehabilitation Act](https://www.hhs.gov/civil-rights/for-individuals/disability/section-504-rehabilitation-act-of-1973/index.html) — applies to recipients of federal funding, including UC.
+- [Section 504 of the Rehabilitation Act](https://www.hhs.gov/civil-rights/for-individuals/disability/section-504-rehabilitation-act-of-1973/index.html): applies to recipients of federal funding, including UC.
 
 ### UC / UCSC policy
 
-- [UC IMG-2150, Electronic Information Communication and Technology Accessibility](https://policy.ucop.edu/doc/7000611/IMT-2150) — UC systemwide accessibility policy.
-- [UCSC IT Accessibility](https://its.ucsc.edu/accessibility/) — ITS program page.
-- [UCSC Accessibility landing](https://accessibility.ucsc.edu/) — campus accessibility policy hub.
-- [UCSC Disability Resource Center](https://drc.ucsc.edu/) — student accommodations.
-- [UCSC AI Council](https://its.ucsc.edu/about/it-governance/artificial-intelligence) — the campus body reviewing AI tools.
-- [UC Electronic Information Security Policy, IS-3](https://security.ucop.edu/policies/institutional-information-and-it-resource-classification.html) — security classification referenced in other politics docs.
+- [UC IMG-2150, Electronic Information Communication and Technology Accessibility](https://policy.ucop.edu/doc/7000611/IMT-2150): UC systemwide accessibility policy.
+- [UCSC IT Accessibility](https://its.ucsc.edu/accessibility/): ITS program page.
+- [UCSC Accessibility landing](https://accessibility.ucsc.edu/): campus accessibility policy hub.
+- [UCSC Disability Resource Center](https://drc.ucsc.edu/): student accommodations.
+- [UCSC AI Council](https://its.ucsc.edu/about/it-governance/artificial-intelligence): the campus body reviewing AI tools.
+- [UC Electronic Information Security Policy, IS-3](https://security.ucop.edu/policies/institutional-information-and-it-resource-classification.html): security classification referenced in other politics docs.
 
 ### Evaluation tools
 
-- [axe-core](https://github.com/dequelabs/axe-core) — the reference open-source rules engine.
-- [axe DevTools](https://www.deque.com/axe/devtools/) — browser extension.
-- [WAVE](https://wave.webaim.org/) — WebAIM evaluation tool.
-- [Lighthouse accessibility](https://developer.chrome.com/docs/lighthouse/accessibility/) — built into Chrome DevTools.
-- [pa11y](https://github.com/pa11y/pa11y) — CLI runner.
-- [pa11y-ci](https://github.com/pa11y/pa11y-ci) — CI runner.
-- [Accessibility Insights for Web](https://accessibilityinsights.io/docs/web/overview/) — Microsoft tool with structured manual tests.
+- [axe-core](https://github.com/dequelabs/axe-core): the reference open-source rules engine.
+- [axe DevTools](https://www.deque.com/axe/devtools/): browser extension.
+- [WAVE](https://wave.webaim.org/): WebAIM evaluation tool.
+- [Lighthouse accessibility](https://developer.chrome.com/docs/lighthouse/accessibility/): built into Chrome DevTools.
+- [pa11y](https://github.com/pa11y/pa11y): CLI runner.
+- [pa11y-ci](https://github.com/pa11y/pa11y-ci): CI runner.
+- [Accessibility Insights for Web](https://accessibilityinsights.io/docs/web/overview/): Microsoft tool with structured manual tests.
 - [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/).
 - [WebAIM Screen Reader User Survey #10](https://webaim.org/projects/screenreadersurvey10/).
-- [NVDA](https://www.nvaccess.org/) — free Windows screen reader.
+- [NVDA](https://www.nvaccess.org/): free Windows screen reader.
 - [Apple VoiceOver](https://www.apple.com/accessibility/vision/).
 - [JAWS](https://www.freedomscientific.com/products/software/jaws/).
-- [Orca](https://help.gnome.org/users/orca/stable/) — Linux screen reader.
+- [Orca](https://help.gnome.org/users/orca/stable/): Linux screen reader.
 
 ### Upstream projects
 
-- [Open WebUI](https://openwebui.com/) — BayLeaf Chat's UI (see [§ 5.1](#51-bayleaf-chat-chatbayleafdev)).
+- [Open WebUI](https://openwebui.com/): BayLeaf Chat's UI (see [§ 5.1](#51-bayleaf-chat-chatbayleafdev)).
   - [Repository](https://github.com/open-webui/open-webui).
   - [Documentation](https://docs.openwebui.com/).
   - [Issues labeled accessibility](https://github.com/open-webui/open-webui/issues?q=is%3Aissue+label%3Aaccessibility).
   - [Full-text search: a11y](https://github.com/open-webui/open-webui/issues?q=a11y).
   - [Full-text search: accessibility](https://github.com/open-webui/open-webui/issues?q=accessibility).
-- [Hono](https://hono.dev/) — framework for BayLeaf API.
+- [Hono](https://hono.dev/): framework for BayLeaf API.
 - [Hono JSX](https://hono.dev/docs/guides/jsx).
-- [Svelte](https://svelte.dev/) and [SvelteKit](https://kit.svelte.dev/) — Open WebUI's frontend stack.
+- [Svelte](https://svelte.dev/) and [SvelteKit](https://kit.svelte.dev/): Open WebUI's frontend stack.
 
 ### Platform ACRs (courtesy disclosures for outbound links)
 
-- [GitHub Accessibility](https://accessibility.github.com/) — ACRs for github.com and related products.
-- [Cloudflare Accessibility Statement](https://www.cloudflare.com/trust-hub/accessibility/) — platform hosting BayLeaf API.
-- [DigitalOcean Accessibility](https://www.digitalocean.com/legal/accessibility) — platform hosting BayLeaf Chat.
+- [GitHub Accessibility](https://accessibility.github.com/): ACRs for github.com and related products.
+- [Cloudflare Accessibility Statement](https://www.cloudflare.com/trust-hub/accessibility/): platform hosting BayLeaf API.
+- [DigitalOcean Accessibility](https://www.digitalocean.com/legal/accessibility): platform hosting BayLeaf Chat.
 
 ### Related BayLeaf documents
 
-- [HECVAT.md](HECVAT.md) — security questionnaire with framing memo.
-- [FERPA.md](FERPA.md) — student-privacy analysis and draft designation memo.
-- [SECURITY.md](SECURITY.md) — platform data handling.
-- [DEPENDENCIES.md](DEPENDENCIES.md) — dependency audit.
-- [ACCOUNTS.md](ACCOUNTS.md) — account / credential handover plan.
-- [../SECURITY.md](../SECURITY.md) — repo-root vulnerability-reporting policy.
-- [../chat/DESIGN.md](../chat/DESIGN.md) — BayLeaf Chat architecture.
-- [POSITION.md](POSITION.md) — pedagogical position on institutional AI.
+- [HECVAT.md](HECVAT.md): security questionnaire with framing memo.
+- [FERPA.md](FERPA.md): student-privacy analysis and draft designation memo.
+- [SECURITY.md](SECURITY.md): platform data handling.
+- [DEPENDENCIES.md](DEPENDENCIES.md): dependency audit.
+- [ACCOUNTS.md](ACCOUNTS.md): account / credential handover plan.
+- [../SECURITY.md](../SECURITY.md): repo-root vulnerability-reporting policy.
+- [../chat/DESIGN.md](../chat/DESIGN.md): BayLeaf Chat architecture.
+- [POSITION.md](POSITION.md): pedagogical position on institutional AI.
