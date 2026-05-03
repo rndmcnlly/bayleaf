@@ -82,8 +82,11 @@ DO Spaces bucket for file uploads and OWUI storage.
 |----------|-------|
 | Bucket | `bayleaf-ucsc-storage` |
 | Region | `sfo2` |
-| Endpoint | `https://bayleaf-ucsc-storage.sfo2.digitaloceanspaces.com` |
+| Endpoint | `https://sfo2.digitaloceanspaces.com` (path-style; see §6a) |
 | Access key | Scoped (Read/Write/Delete on this bucket only), not account-wide full access |
+
+Objects are stored flat at the bucket root (no key prefix). Uploaded via OWUI
+yield keys of the form `<uuid>_<original-filename>`.
 
 ### Environment Variables
 
@@ -119,7 +122,7 @@ All env vars are set with scope `RUN_AND_BUILD_TIME` unless noted.
 | `DATABASE_URL` | `${bayleaf-chat-db.DATABASE_URL}` | Scope: `RUN_TIME` only |
 | `STORAGE_PROVIDER` | `s3` | |
 | `S3_BUCKET_NAME` | `bayleaf-ucsc-storage` | |
-| `S3_ENDPOINT_URL` | `https://bayleaf-ucsc-storage.sfo2.digitaloceanspaces.com` | |
+| `S3_ENDPOINT_URL` | `https://sfo2.digitaloceanspaces.com` | Region endpoint (path-style); do **not** use the virtual-hosted `<bucket>.sfo2.digitaloceanspaces.com` form — see §6a |
 | `S3_REGION_NAME` | `sfo2` | |
 | `S3_ACCESS_KEY_ID` | `<REDACTED>` | Encrypted in DO (was plaintext in the pre-migration app; hardened to SECRET during 2026-04 migration) |
 | `S3_SECRET_ACCESS_KEY` | `<REDACTED>` | Encrypted in DO (same as above) |
@@ -661,6 +664,98 @@ To reconstruct BayLeaf Chat from this backup:
 
 7. **Set access grants** — Configure group-based access for restricted models
    and tools. Group UUIDs will differ in a new deployment; map by group name.
+
+---
+
+## 6a. Post-mortem: S3 migration/retrieval incident (2026-05-02)
+
+In the first-ever recovery exercise of BayLeaf Chat's storage layer, two
+independent bugs were found and fixed in the same session. Documented here so
+the next operator (or agent) can recognise the failure modes quickly.
+
+### Symptoms
+
+- All file attachments in chats returned HTTP 400 `{"detail": "[ERROR: Error
+  getting file content]"}` from `GET /api/v1/files/{id}/content`.
+- One post-migration file retrieved 200 early in the debugging session but 404
+  later — a red herring that turned out to be the OWUI local cache warming
+  from upload-time bytes, then getting wiped on redeploy.
+
+### Bug 1: `S3_ENDPOINT_URL` virtual-hosted style
+
+The app spec had `S3_ENDPOINT_URL=https://bayleaf-ucsc-storage.sfo2.digitaloceanspaces.com`,
+i.e. the bucket name in the *hostname*. Combined with `S3_BUCKET_NAME=bayleaf-ucsc-storage`
+and boto3's default path-style addressing, every request path was
+`https://bayleaf-ucsc-storage.sfo2.digitaloceanspaces.com/bayleaf-ucsc-storage/<key>` —
+DigitalOcean saw the bucket in the hostname AND as the first path segment, so
+uploads landed at key `bayleaf-ucsc-storage/<real-key>` and retrievals looked
+up the same doubly-prefixed key. Upstream OWUI `_extract_s3_key` stripped the
+first path segment, making the key round-trip correctly in principle, but the
+physical storage layout was inconsistent with what the rest of the system
+assumed.
+
+Fix: endpoint URL changed to `https://sfo2.digitaloceanspaces.com` (region
+endpoint, path-style). Verified with a boto3 repro that constructed both URL
+forms and HEAD'd the same key against both.
+
+### Bug 2: Migration left DB paths unrewritten
+
+The 2026-04-29 bucket rename from `bayleaf-chat-space` → `bayleaf-ucsc-storage`
+copied 273 objects server-side (preserving them under a `bayleaf-chat-space/`
+key prefix inside the new bucket) but did not update the `file.path` column in
+the managed PostgreSQL database. 224 DB rows continued to point at
+`s3://bayleaf-chat-space/...`.
+
+Fix: collapsed all 274 objects (273 migrated + 1 post-migration stray) to the
+bucket root via server-side `copy_object`, then rewrote all 225 file-table rows
+to the flat form `s3://bayleaf-ucsc-storage/<uuid>_<filename>`, then deleted
+the prefixed sources. Idempotent, transactional on the DB side, verified
+end-to-end with upload/retrieve/delete smoke test.
+
+### Bugs interacted to obscure each other
+
+Either bug alone would have been easy to isolate. Together, they produced
+confusing signals:
+
+- The one post-migration file "worked" earlier in the session (local cache,
+  see above) but "didn't work" later, making it unclear whether bug 2 was
+  active or resolved.
+- Rewriting a single DB row's path as a canary didn't fix retrieval, because
+  bug 1 would have caused a 404 regardless.
+- The canary evidence suggested the path rewrite theory was wrong; only
+  constructing the actual request URLs against DO Spaces (outside boto3)
+  revealed bug 1.
+
+The diagnostic path that worked: tail the running container's logs during a
+failed retrieval, see the raw `(404) when calling the HeadObject operation`
+from boto3, inspect the deployed `provider.py` source to confirm
+`_extract_s3_key` behavior, then independently construct path-style vs.
+virtual-hosted-style requests to see which DigitalOcean responds to.
+
+### Orphan file cleanup as follow-on
+
+During reconciliation, 49 objects in the bucket had no matching `file` row
+(true S3-level orphans from pre-migration deleted chats) and 112 `file` rows
+had no surviving chat/KB reference (true DB-level orphans). Both classes were
+cleaned up during this session's post-migration pass, and an automated orphan
+sweep (§5 of `RETENTION.md`) now runs daily to keep the bucket and DB in sync
+going forward.
+
+### Prevention
+
+For any future bucket migration:
+
+1. **Migrations must update DB references in the same transactional scope as
+   object copies**, or at minimum in the same runbook step. Decoupling the two
+   is how bug 2 happened.
+2. **Storage config should be validated against physical layout** after any
+   change. A simple smoke test (upload a file, retrieve it, check the object
+   key in the bucket matches the DB path) catches bug 1 immediately.
+3. **`S3_ENDPOINT_URL` for DigitalOcean Spaces should always be the region
+   endpoint** (`https://<region>.digitaloceanspaces.com`), never a
+   bucket-hostname endpoint. Bucket goes in the `S3_BUCKET_NAME` env var; the
+   endpoint stays generic. DO's documentation shows both forms and does not
+   warn that using both together causes double-prefixing.
 
 ---
 
