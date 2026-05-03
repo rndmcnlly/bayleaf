@@ -23,7 +23,7 @@ email, Canvas, etc.) before the retention window closes.
 | Active conversations | **90 days** since last activity | `updated_at` timestamp |
 | Archived conversations | **90 days** since last activity | `updated_at` timestamp (archival does not reset or alter the clock) |
 | Uploaded files attached to conversations | Inherited from owning conversation | Deleted when the conversation is deleted (CASCADE) |
-| Orphan files (no live conversation reference) | Deleted on next cleanup run | — (not yet implemented) |
+| Orphan files (no live conversation or knowledge-base reference) | Deleted on next cleanup run after a **24-hour grace window** | `created_at` timestamp |
 | Temporary conversations | Ephemeral (OWUI handles) | Not persisted |
 
 **"Last activity"** means any event that updates the conversation's `updated_at`
@@ -121,6 +121,7 @@ to the database directly. This ensures:
 ### Algorithm (daily run)
 
 ```
+Phase A: Conversation retention
 1. Health check: GET /health (fail if unhealthy)
 2. GET /api/v1/users/ (paginated) → build user list
    - User objects include group_ids inline
@@ -133,12 +134,48 @@ to the database directly. This ensures:
        If effective_updated < cutoff:
          DELETE /api/v1/chats/{id}
 6. If any deletion fails → exit non-zero (triggers DO alert)
-7. Log aggregate summary (non-sensitive: counts only)
+
+Phase B: Orphan file sweep (runs after Phase A)
+7. GET /api/v1/files/ (paginated) → build file list with created_at
+8. GET /api/v1/knowledge/ → enumerate knowledge bases
+     For each KB: GET /api/v1/knowledge/{id}/files → collect referenced file ids
+9. For each user, for each surviving chat:
+     GET /api/v1/chats/{id} → scan full chat JSON for file-id UUIDs
+10. orphan = file whose id appears in NEITHER KB references NOR any chat JSON
+11. Apply 24-hour grace window: skip orphans with created_at >= now - ORPHAN_GRACE_SECONDS
+12. DELETE /api/v1/files/{id} for each qualifying orphan
+13. If any deletion fails → exit non-zero
+
+14. Log aggregate summary (non-sensitive: counts only)
 ```
 
 The job fails hard (non-zero exit) on any API error, network failure, or
 deletion error. Logs contain only aggregate counts (chats scanned, deleted,
-users impacted), never user names, emails, chat titles, or IDs.
+users impacted, files scanned, files orphan, files deleted), never user
+names, emails, chat titles, or IDs.
+
+#### Phase B design notes
+
+- **Reference sources**: surviving chat JSON (`chat.chat` column, including
+  embedded `{type: 'file', file: {id: ...}}` entries in each message) and
+  knowledge-base file lists (`knowledge_file` equivalent, exposed via the
+  `/knowledge/{id}/files` endpoint). These cover every file the user can
+  reach through the OWUI UI.
+- **24-hour grace window** (`ORPHAN_GRACE_SECONDS`, default `86400`): protects
+  in-flight uploads from temporary chats. When a user pastes a screenshot or
+  drags a file into a temporary chat that is never saved, OWUI creates a
+  `file` row immediately but no chat record. Without the grace window, such
+  files could be deleted during an active session.
+- **Abandoned draft attachments**: files that the user attached to a
+  compose/draft but never sent are classified as orphans. OWUI internally
+  records these in a `chat_file` table for permission checks, but the table
+  is not exposed through the API and the files are not reachable through
+  the UI. They are safe to delete.
+- **Why pure-API**: consistent with the rest of the cleanup job's design;
+  the retention service does not hold DB credentials and does not require
+  database firewall exceptions. Trade-off: orphan detection cost scales
+  linearly with total chats (one `GET /chats/{id}` per surviving chat per
+  run). At current scale (~500 chats) this completes in under two minutes.
 
 ### Configuration
 
@@ -148,6 +185,7 @@ users impacted), never user names, emails, chat titles, or IDs.
 | `OWUI_TOKEN` | (secret) | Long-lived admin JWT (10-year expiry, signed with `WEBUI_SECRET_KEY`) |
 | `RETENTION_DAYS` | `90` | Configurable; default matches this policy |
 | `RETENTION_SUNRISE` | `2026-04-28` | Grace period start date (see §2a below) |
+| `ORPHAN_GRACE_SECONDS` | `86400` | Min age of an orphan before deletion (24h default protects temporary-chat uploads) |
 | `DRY_RUN` | `false` | Set to `true` for dry-run mode; `--live` flag also available |
 
 ### Deployment

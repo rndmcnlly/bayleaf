@@ -37,6 +37,34 @@ the app spec YAML and deploying via `doctl apps update`. Secret values are
 encrypted in the spec; to change a secret, set `type: SECRET` and provide the
 new plaintext value — DO encrypts it on deploy.
 
+## Retention Cleanup Job
+
+Scheduled job `retention-cleanup` (cron `0 6 * * *` America/Los_Angeles) runs
+`chat/retention_cleanup.py` against the OWUI admin API. See `RETENTION.md` for
+policy; source at `chat/retention_cleanup.py`, image at `chat/Dockerfile.retention`.
+
+**Checking recent runs** (DO's public API is the reliable path; `doctl apps
+logs` hangs without `--job-invocation`, because for SCHEDULED jobs there is no
+continuously-running pod to attach to):
+
+```bash
+# List invocation history (phase, trigger, timestamps)
+TOKEN=$(awk '/^  bayleaf:/ {print $2}' "$HOME/Library/Application Support/doctl/config.yaml")
+curl -sS -H "Authorization: Bearer $TOKEN" \
+  "https://api.digitalocean.com/v2/apps/f1a1e758-62e9-4e99-90cb-212cab12958d/job-invocations?component_name=retention-cleanup" \
+  | python3 -m json.tool
+
+# Fetch stdout from a specific run (get id from the list above)
+doctl apps logs f1a1e758-62e9-4e99-90cb-212cab12958d retention-cleanup \
+  --context bayleaf --type run --no-prefix \
+  --job-invocation <invocation-id>
+```
+
+Each run prints aggregate-only counts (retention_days, cutoff, sunrise,
+grace_expires, users_total/held, chats_scanned/expired/deleted, status). No
+user identifiers. Until `grace_expires` passes, zero deletions is the correct
+outcome.
+
 ## OWUI Admin API
 
 Model, tool, function, user, and group management uses

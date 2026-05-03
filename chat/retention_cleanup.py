@@ -5,8 +5,15 @@
 """
 BayLeaf Chat — Retention Cleanup Job
 
-Deletes conversations older than RETENTION_DAYS (default 90) that have not been
-updated. Users in any `hold:*` group are exempt.
+Two-phase cleanup per RETENTION.md:
+
+  Phase A: Delete conversations older than RETENTION_DAYS (default 90) with no
+           recent activity. Users in any `hold:*` group are exempt.
+
+  Phase B: Delete orphan files: file rows with no reference from any surviving
+           chat or knowledge base, older than ORPHAN_GRACE_SECONDS (default
+           86400 = 24h). The grace window protects in-flight uploads from
+           temporary chats that have not yet been sent or saved.
 
 Communicates exclusively through the OWUI admin API (no direct DB access).
 
@@ -16,6 +23,8 @@ Design principles:
     Only aggregate counts appear in stdout.
   - DO App Platform captures stdout; configure "Failed job invocation" alert
     to get emailed on failures.
+  - Phase B runs AFTER Phase A so that files attached to just-expired chats
+    are correctly classified as orphans.
 
 Usage:
     # Dry run (default): report what would be deleted
@@ -25,14 +34,17 @@ Usage:
     DRY_RUN=false uv run chat/retention_cleanup.py
 
 Environment:
-    OWUI_URL        Base URL of the OWUI instance (required)
-    OWUI_TOKEN      Admin bearer token (required)
-    RETENTION_DAYS  Days of inactivity before deletion (default: 90)
-    DRY_RUN         "true" (default) or "false"
+    OWUI_URL              Base URL of the OWUI instance (required)
+    OWUI_TOKEN            Admin bearer token (required)
+    RETENTION_DAYS        Days of inactivity before chat deletion (default: 90)
+    ORPHAN_GRACE_SECONDS  Min age for orphan file deletion (default: 86400)
+    DRY_RUN               "true" (default) or "false"
 """
 
 import argparse
+import json
 import os
+import re
 import sys
 import time
 import httpx
@@ -45,13 +57,16 @@ def parse_args():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""\
 environment variables:
-  OWUI_URL           Base URL of the OWUI instance (required)
-  OWUI_TOKEN         Admin bearer token (required)
-  RETENTION_DAYS     Days of inactivity before deletion (default: 90)
-  RETENTION_SUNRISE  Policy announcement date, YYYY-MM-DD (optional).
-                     Existing chats are treated as active until at least this
-                     date, giving users a full RETENTION_DAYS grace period.
-  DRY_RUN            "true" (default) or "false"
+  OWUI_URL              Base URL of the OWUI instance (required)
+  OWUI_TOKEN            Admin bearer token (required)
+  RETENTION_DAYS        Days of inactivity before deletion (default: 90)
+  RETENTION_SUNRISE     Policy announcement date, YYYY-MM-DD (optional).
+                        Existing chats are treated as active until at least this
+                        date, giving users a full RETENTION_DAYS grace period.
+  ORPHAN_GRACE_SECONDS  Min age of an orphan file before deletion (default: 86400).
+                        Protects in-flight uploads from temporary chats that have
+                        not yet been sent or saved.
+  DRY_RUN               "true" (default) or "false"
 
 examples:
   # Dry run (default): report what would be deleted
@@ -82,6 +97,7 @@ args = parse_args()
 OWUI_URL = os.environ.get("OWUI_URL", "").rstrip("/")
 OWUI_TOKEN = os.environ.get("OWUI_TOKEN", "")
 RETENTION_DAYS = args.retention_days or int(os.environ.get("RETENTION_DAYS", "90"))
+ORPHAN_GRACE_SECONDS = int(os.environ.get("ORPHAN_GRACE_SECONDS", str(86400)))
 
 # Sunrise date: the date the retention policy was announced. All chats are
 # treated as if their last activity was at least this date, giving existing
@@ -135,6 +151,8 @@ if not OWUI_TOKEN:
     fail("OWUI_TOKEN is not set")
 if RETENTION_DAYS < 1:
     fail(f"RETENTION_DAYS must be >= 1, got {RETENTION_DAYS}")
+if ORPHAN_GRACE_SECONDS < 0:
+    fail(f"ORPHAN_GRACE_SECONDS must be >= 0, got {ORPHAN_GRACE_SECONDS}")
 
 CUTOFF = int(time.time()) - (RETENTION_DAYS * 86400)
 HEADERS = {"Authorization": f"Bearer {OWUI_TOKEN}"}
@@ -245,6 +263,108 @@ def delete_chat(chat_id: str) -> bool:
     return resp.status_code == 200
 
 
+# --- Orphan file sweep helpers ---
+
+UUID_RE = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
+
+
+def get_all_files() -> list[dict]:
+    """Paginate through all files via /api/v1/files/ ({items, total} envelope).
+
+    Uses content=false to avoid shipping extracted text over the wire.
+    """
+    files = []
+    page = 1
+    while True:
+        try:
+            resp = client.get(
+                "/api/v1/files/", params={"page": page, "content": "false"}
+            )
+        except httpx.RequestError as e:
+            fail(f"Network error fetching files page {page}: {e}")
+        if resp.status_code != 200:
+            fail(f"Files endpoint returned HTTP {resp.status_code} on page {page}")
+        data = resp.json()
+        if not isinstance(data, dict) or "items" not in data:
+            fail(f"Unexpected /api/v1/files/ response shape: {type(data).__name__}")
+        batch = data.get("items", [])
+        files.extend(batch)
+        if len(files) >= data.get("total", 0):
+            break
+        if not batch:
+            break
+        page += 1
+        if page > 500:  # hard stop guard
+            fail("Files pagination exceeded 500 pages; likely a bug")
+    return files
+
+
+def get_all_knowledge_bases() -> list[dict]:
+    """Paginate through all knowledge bases via /api/v1/knowledge/."""
+    kbs = []
+    page = 1
+    while True:
+        try:
+            resp = client.get("/api/v1/knowledge/", params={"page": page})
+        except httpx.RequestError as e:
+            fail(f"Network error fetching knowledge page {page}: {e}")
+        if resp.status_code != 200:
+            fail(f"Knowledge endpoint returned HTTP {resp.status_code}")
+        data = resp.json()
+        # /api/v1/knowledge/ may return a list (small instances) or an envelope
+        if isinstance(data, list):
+            kbs.extend(data)
+            break
+        if isinstance(data, dict) and "items" in data:
+            batch = data.get("items", [])
+            kbs.extend(batch)
+            if len(kbs) >= data.get("total", 0):
+                break
+            if not batch:
+                break
+            page += 1
+            if page > 500:
+                fail("Knowledge pagination exceeded 500 pages; likely a bug")
+            continue
+        fail(f"Unexpected /api/v1/knowledge/ response shape: {type(data).__name__}")
+    return kbs
+
+
+def get_kb_file_ids(kb_id: str) -> set[str]:
+    """Return the set of file ids attached to a knowledge base."""
+    try:
+        resp = client.get(f"/api/v1/knowledge/{kb_id}/files")
+    except httpx.RequestError as e:
+        fail(f"Network error fetching KB files for {kb_id[:8]}: {e}")
+    if resp.status_code != 200:
+        fail(f"KB files endpoint returned HTTP {resp.status_code}")
+    data = resp.json()
+    items = data.get("items", []) if isinstance(data, dict) else (data or [])
+    return {item["id"] for item in items if isinstance(item, dict) and item.get("id")}
+
+
+def get_full_chat(chat_id: str) -> dict | None:
+    """Fetch a single chat's full JSON. Returns None on 404."""
+    try:
+        resp = client.get(f"/api/v1/chats/{chat_id}")
+    except httpx.RequestError as e:
+        fail(f"Network error fetching chat: {e}")
+    if resp.status_code == 404:
+        return None
+    if resp.status_code != 200:
+        fail(f"Chat detail endpoint returned HTTP {resp.status_code}")
+    return resp.json()
+
+
+def delete_file(file_id: str) -> bool:
+    """Delete a single file. Returns True on success."""
+    try:
+        resp = client.delete(f"/api/v1/files/{file_id}")
+    except httpx.RequestError as e:
+        fail(f"Network error during file delete: {e}")
+    return resp.status_code == 200
+
+
 # --- Main ---
 
 def main():
@@ -320,7 +440,7 @@ def main():
         log(f"users_impacted={len(users_impacted)}")
         fail(f"{total_errors} deletion(s) failed")
 
-    # 5. Success summary (non-sensitive aggregate only)
+    # 5. Phase A summary (non-sensitive aggregate only)
     log(f"chats_scanned={total_scanned}")
     log(f"chats_expired={total_expired}")
     if DRY_RUN:
@@ -328,6 +448,94 @@ def main():
     else:
         log(f"chats_deleted={total_deleted}")
     log(f"users_impacted={len(users_impacted)}")
+
+    # --- Phase B: orphan file sweep ---
+    #
+    # Definition (per RETENTION.md §5): a file is an orphan when NO surviving
+    # chat embeds its id in message JSON AND no knowledge base references it.
+    # Files younger than ORPHAN_GRACE_SECONDS are exempt; this protects
+    # in-flight uploads from temporary chats that have not yet been committed.
+    #
+    # Note: OWUI internally maintains a `chat_file` link table for permission
+    # checks, which is not exposed through the API. Files referenced only by
+    # that table (typically abandoned draft attachments that the user never
+    # sent) are classified as orphans and deleted. This is intentional: those
+    # files are no longer reachable through the UI.
+    log(f"orphan_grace_seconds={ORPHAN_GRACE_SECONDS}")
+
+    files = get_all_files()
+    log(f"files_total={len(files)}")
+
+    referenced_ids: set[str] = set()
+    file_id_set: set[str] = {f["id"] for f in files if f.get("id")}
+
+    # Reference source 1: knowledge bases
+    kbs = get_all_knowledge_bases()
+    log(f"knowledge_bases={len(kbs)}")
+    for kb in kbs:
+        kb_id = kb.get("id")
+        if not kb_id:
+            continue
+        referenced_ids.update(get_kb_file_ids(kb_id))
+
+    # Reference source 2: every surviving chat's full JSON.
+    # After Phase A, expired chats have been deleted; their attachments
+    # correctly no longer appear in anyone's chat list.
+    chats_fetched = 0
+    for user in users:
+        uid = user["id"]
+        # Re-list: a user whose chats were all expired during Phase A might
+        # return an empty list now, which is fine.
+        chats = get_user_chats(uid)
+        for chat_summary in chats:
+            chat_id = chat_summary.get("id")
+            if not chat_id:
+                continue
+            full = get_full_chat(chat_id)
+            if full is None:
+                continue
+            chats_fetched += 1
+            # Match file UUIDs against the known file-id set. This avoids
+            # picking up unrelated UUIDs (model ids, message ids, etc.).
+            haystack = json.dumps(full)
+            for uid_match in UUID_RE.findall(haystack):
+                if uid_match in file_id_set:
+                    referenced_ids.add(uid_match)
+
+    log(f"chats_scanned_for_refs={chats_fetched}")
+    log(f"files_referenced={len(referenced_ids)}")
+
+    # Candidate orphans: unreferenced AND older than grace window
+    now = int(time.time())
+    grace_cutoff = now - ORPHAN_GRACE_SECONDS
+    orphans = [
+        f
+        for f in files
+        if f["id"] not in referenced_ids and f.get("created_at", 0) < grace_cutoff
+    ]
+    files_in_grace = sum(
+        1
+        for f in files
+        if f["id"] not in referenced_ids and f.get("created_at", 0) >= grace_cutoff
+    )
+    log(f"files_in_grace={files_in_grace}")
+    log(f"files_orphan={len(orphans)}")
+
+    orphan_deleted = 0
+    orphan_errors = 0
+    if DRY_RUN:
+        log(f"files_would_delete={len(orphans)}")
+    else:
+        for f in orphans:
+            if delete_file(f["id"]):
+                orphan_deleted += 1
+            else:
+                orphan_errors += 1
+        log(f"files_deleted={orphan_deleted}")
+        if orphan_errors > 0:
+            log(f"files_errors={orphan_errors}")
+            fail(f"{orphan_errors} orphan file deletion(s) failed")
+
     log("status=ok")
 
 
